@@ -18,7 +18,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 
 import junit.framework.TestCase;
@@ -31,6 +30,7 @@ import org.activiti.engine.DynamicBpmnService;
 import org.activiti.engine.HistoryService;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.ProcessEngine;
+import org.activiti.engine.ProcessEngineConfiguration;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
@@ -39,18 +39,12 @@ import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.impl.ProcessEngineImpl;
 import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
-import org.activiti.engine.impl.db.DbSqlSession;
 import org.activiti.engine.impl.history.HistoryLevel;
 import org.activiti.engine.impl.identity.Authentication;
-import org.activiti.engine.impl.interceptor.Command;
-import org.activiti.engine.impl.interceptor.CommandConfig;
-import org.activiti.engine.impl.interceptor.CommandContext;
-import org.activiti.engine.impl.interceptor.CommandExecutor;
 import org.activiti.engine.repository.Deployment;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.ProcessInstance;
 
-import junit.framework.AssertionFailedError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,8 +52,6 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractActivitiTestCase extends TestCase {
 
   private static final Logger logger = LoggerFactory.getLogger(AbstractActivitiTestCase.class);
-
-  private static final List<String> TABLENAMES_EXCLUDED_FROM_DB_CLEAN_CHECK = singletonList("ACT_GE_PROPERTY");
 
   protected ProcessEngine processEngine;
 
@@ -104,7 +96,7 @@ public abstract class AbstractActivitiTestCase extends TestCase {
 
       validateHistoryData();
 
-    } catch (AssertionFailedError e) {
+    } catch (AssertionError e) {
       logger.error("ASSERTION FAILED: {}", e, e);
       exception = e;
       throw e;
@@ -193,47 +185,11 @@ public abstract class AbstractActivitiTestCase extends TestCase {
   }
 
   /**
-   * Each test is assumed to clean up all DB content it entered. After a test method executed, this method scans all tables to see if the DB is completely clean. It throws AssertionFailed in case the
-   * DB is not clean. If the DB is not clean, it is cleaned by performing a create a drop.
+   * Each test is assumed to clean up all DB content it entered. After a test method executed, this method scans all tables to see if the DB is completely clean.
+   * It fails in case the DB is not clean. If the DB is not clean, it is cleaned by performing a create a drop.
    */
-  protected void assertAndEnsureCleanDb() throws Throwable {
-    logger.debug("verifying that db is clean after test");
-    Map<String, Long> tableCounts = managementService.getTableCount();
-    StringBuilder outputMessage = new StringBuilder();
-    for (String tableName : tableCounts.keySet()) {
-      String tableNameWithoutPrefix = tableName.replace(processEngineConfiguration.getDatabaseTablePrefix(), "");
-      if (!TABLENAMES_EXCLUDED_FROM_DB_CLEAN_CHECK.contains(tableNameWithoutPrefix)) {
-        Long count = tableCounts.get(tableName);
-        if (count != 0L) {
-          outputMessage.append("  ").append(tableName).append(": ").append(count).append(" record(s) ");
-        }
-      }
-    }
-    if (outputMessage.length() > 0) {
-      outputMessage.insert(0, "DB NOT CLEAN: \n");
-      logger.error(outputMessage.toString());
-
-      logger.info("dropping and recreating db");
-
-      CommandExecutor commandExecutor = ((ProcessEngineImpl) processEngine).getProcessEngineConfiguration().getCommandExecutor();
-      CommandConfig config = new CommandConfig().transactionNotSupported();
-      commandExecutor.execute(config, new Command<Object>() {
-        public Object execute(CommandContext commandContext) {
-          DbSqlSession session = commandContext.getDbSqlSession();
-          session.dbSchemaDrop();
-          session.dbSchemaCreate();
-          return null;
-        }
-      });
-
-      if (exception != null) {
-        throw exception;
-      } else {
-        fail(outputMessage.toString());
-      }
-    } else {
-      logger.info("database was clean");
-    }
+  protected void assertAndEnsureCleanDb() {
+    TestHelper.assertAndEnsureCleanDb(processEngine);
   }
 
   protected void initializeServices() {
@@ -247,13 +203,16 @@ public abstract class AbstractActivitiTestCase extends TestCase {
   }
 
   public void assertProcessEnded(final String processInstanceId) {
-    ProcessInstance processInstance = processEngine.getRuntimeService().createProcessInstanceQuery().processInstanceId(processInstanceId).singleResult();
+    assertProcessEnded(processEngine, processInstanceId);
+  }
 
-    if (processInstance != null) {
-      throw new AssertionFailedError("Expected finished process instance '" + processInstanceId + "' but it was still in the db");
-    }
+  public static void assertProcessEnded(ProcessEngine processEngine, final String processInstanceId) {
+    TestHelper.assertProcessEnded(processEngine, processInstanceId);
 
     // Verify historical data if end times are correctly set
+    ProcessEngineConfiguration processEngineConfiguration = processEngine.getProcessEngineConfiguration();
+    HistoryService historyService = processEngine.getHistoryService();
+
     if (processEngineConfiguration.getHistoryLevel().isAtLeast(HistoryLevel.AUDIT)) {
 
       // process instance
@@ -401,7 +360,7 @@ public abstract class AbstractActivitiTestCase extends TestCase {
       for (String taskName : taskNames) {
         List<HistoricTaskInstance> historicTaskInstances = historyService.createHistoricTaskInstanceQuery()
             .processInstanceId(processInstance.getId()).taskName(taskName).list();
-        assertThat(historicTaskInstances.size() > 0).isTrue();
+        assertThat(historicTaskInstances).isNotEmpty();
         for (HistoricTaskInstance historicTaskInstance : historicTaskInstances) {
           assertThat(historicTaskInstance.getEndTime()).isNotNull();
           if (expectedDeleteReason == null) {

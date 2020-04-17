@@ -34,7 +34,7 @@
     <bean id="historyService" factory-bean="processEngine" factory-method="getHistoryService"/>
     <bean id="managementService" factory-bean="processEngine" factory-method="getManagementService"/>
 
-    <tx:annotation-driven transaction-manager="transactionManager"/>
+    <tx:annotation-driven />
 
     <bean id="userBean" class="org.activiti.spring.test.transaction.UserBean">
         <property name="runtimeService" ref="runtimeService"/>

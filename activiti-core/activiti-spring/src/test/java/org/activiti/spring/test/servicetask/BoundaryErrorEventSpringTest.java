@@ -20,6 +20,7 @@ import java.util.List;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.test.Deployment;
 import org.activiti.spring.impl.test.SpringActivitiTestCase;
+import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 
 /**
@@ -28,19 +29,7 @@ import org.springframework.test.context.ContextConfiguration;
 @ContextConfiguration("classpath:org/activiti/spring/test/servicetask/serviceraskSpringTestCatchError-context.xml")
 public class BoundaryErrorEventSpringTest extends SpringActivitiTestCase {
 
-    private void cleanUp() {
-        List<org.activiti.engine.repository.Deployment> deployments = repositoryService.createDeploymentQuery().list();
-        for (org.activiti.engine.repository.Deployment deployment : deployments) {
-            repositoryService.deleteDeployment(deployment.getId(),
-                                               true);
-        }
-    }
-
-    @Override
-    public void tearDown() {
-        cleanUp();
-    }
-
+    @Test
     @Deployment
     public void testCatchErrorThrownByJavaDelegateOnServiceTask() {
         String procId = runtimeService.startProcessInstanceByKey("catchErrorThrownByExpressionDelegateOnServiceTask").getId();
@@ -60,4 +49,5 @@ public class BoundaryErrorEventSpringTest extends SpringActivitiTestCase {
         taskService.complete(task.getId());
         assertProcessEnded(procId);
     }
+
 }

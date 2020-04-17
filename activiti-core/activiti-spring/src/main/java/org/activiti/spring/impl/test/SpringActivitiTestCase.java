@@ -1,73 +1,85 @@
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.activiti.spring.impl.test;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
+import org.activiti.engine.HistoryService;
+import org.activiti.engine.ManagementService;
 import org.activiti.engine.ProcessEngine;
-import org.activiti.engine.impl.test.AbstractActivitiTestCase;
+import org.activiti.engine.ProcessEngineConfiguration;
+import org.activiti.engine.RepositoryService;
+import org.activiti.engine.RuntimeService;
+import org.activiti.engine.TaskService;
+import org.activiti.engine.impl.test.JobTestHelper;
+import org.activiti.engine.impl.test.TestHelper;
+import org.activiti.engine.test.ActivitiRule;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestContextManager;
-import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
+import org.springframework.test.context.junit4.SpringRunner;
 
 /**
-
-
+ *
  */
-@TestExecutionListeners(DependencyInjectionTestExecutionListener.class)
-public abstract class SpringActivitiTestCase extends AbstractActivitiTestCase implements ApplicationContextAware {
+@RunWith(SpringRunner.class)
+public abstract class SpringActivitiTestCase {
 
-  // we need a data structure to store all the resolved ProcessEngines and map
-  // them to something
-  protected Map<Object, ProcessEngine> cachedProcessEngines = new ConcurrentHashMap<Object, ProcessEngine>();
+    @Autowired
+    protected ApplicationContext applicationContext;
 
-  // protected static Map<String, ProcessEngine> cachedProcessEngines = new
-  // HashMap<String, ProcessEngine>();
+    @Autowired
+    protected RepositoryService repositoryService;
 
-  protected TestContextManager testContextManager;
+    @Autowired
+    protected RuntimeService runtimeService;
 
-  @Autowired
-  protected ApplicationContext applicationContext;
+    @Autowired
+    protected ProcessEngine processEngine;
 
-  public SpringActivitiTestCase() {
-    this.testContextManager = new TestContextManager(getClass());
-  }
+    @Autowired
+    protected ProcessEngineConfiguration processEngineConfiguration;
 
-  @Override
-  public void runBare() throws Throwable {
-    testContextManager.prepareTestInstance(this); // this will initialize
-                                                  // all dependencies
-    super.runBare();
-  }
+    @Autowired
+    protected ManagementService managementService;
 
-  @Override
-  protected void initializeProcessEngine() {
-    ContextConfiguration contextConfiguration = getClass().getAnnotation(ContextConfiguration.class);
-    String[] value = contextConfiguration.value();
-    boolean hasOneArg = value != null && value.length == 1;
-    String key = hasOneArg ? value[0] : ProcessEngine.class.getName();
-    ProcessEngine engine = this.cachedProcessEngines.containsKey(key) ? this.cachedProcessEngines.get(key) : this.applicationContext.getBean(ProcessEngine.class);
+    @Autowired
+    protected HistoryService historyService;
 
-    this.cachedProcessEngines.put(key, engine);
-    this.processEngine = engine;
-  }
+    @Autowired
+    protected TaskService taskService;
 
-  public void setApplicationContext(ApplicationContext applicationContext) {
-    this.applicationContext = applicationContext;
-  }
+    @Rule
+    public ActivitiRule activitiRule = new ActivitiRule();
+
+    @Before
+    public void setUp() {
+        activitiRule.setProcessEngine(processEngine);
+    }
+
+    @After
+    public void tearDown() {
+        TestHelper.cleanUpDeployments(repositoryService);
+    }
+
+    protected void waitForJobExecutorToProcessAllJobs(long maxMillisToWait, long intervalMillis) {
+        JobTestHelper.waitForJobExecutorToProcessAllJobs(activitiRule, maxMillisToWait, intervalMillis);
+    }
+
+    protected void assertProcessEnded(String processInstanceId) {
+        TestHelper.assertProcessEnded(processEngine, processInstanceId);
+    }
+
 }

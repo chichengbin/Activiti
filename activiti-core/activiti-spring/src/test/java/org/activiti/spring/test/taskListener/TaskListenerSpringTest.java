@@ -21,6 +21,8 @@ import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.test.Deployment;
 import org.activiti.spring.impl.test.SpringActivitiTestCase;
+import org.junit.After;
+import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 
 /**
@@ -29,18 +31,7 @@ import org.springframework.test.context.ContextConfiguration;
 @ContextConfiguration("classpath:org/activiti/spring/test/taskListener/TaskListenerDelegateExpressionTest-context.xml")
 public class TaskListenerSpringTest extends SpringActivitiTestCase {
 
-    private void cleanUp() {
-        List<org.activiti.engine.repository.Deployment> deployments = repositoryService.createDeploymentQuery().list();
-        for (org.activiti.engine.repository.Deployment deployment : deployments) {
-            repositoryService.deleteDeployment(deployment.getId(), true);
-        }
-    }
-
-    @Override
-    public void tearDown() {
-        cleanUp();
-    }
-
+    @Test
     @Deployment
     public void testTaskListenerDelegateExpression() {
         ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("taskListenerDelegateExpression");

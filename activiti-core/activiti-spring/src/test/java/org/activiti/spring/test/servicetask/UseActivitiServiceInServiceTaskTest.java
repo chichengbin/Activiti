@@ -19,6 +19,7 @@ import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.test.Deployment;
 import org.activiti.spring.impl.test.SpringActivitiTestCase;
+import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.List;
@@ -31,6 +32,7 @@ public class UseActivitiServiceInServiceTaskTest extends SpringActivitiTestCase 
   /**
    * This test will use the regular mechanism (delegateExecution.getProcessEngine().getRuntimeService()) to obtain the {@link RuntimeService} to start a new process.
    */
+  @Test
   @Deployment
   public void testUseRuntimeServiceNotInjectedInServiceTask() {
     runtimeService.startProcessInstanceByKey("startProcessFromDelegate");
@@ -58,6 +60,7 @@ public class UseActivitiServiceInServiceTaskTest extends SpringActivitiTestCase 
   /**
    * This test will use the dependency injection of Spring to inject the runtime service in the Java delegate.
    */
+  @Test
   @Deployment
   public void testUseInjectedRuntimeServiceInServiceTask() {
     runtimeService.startProcessInstanceByKey("startProcessFromDelegate");
@@ -82,6 +85,7 @@ public class UseActivitiServiceInServiceTaskTest extends SpringActivitiTestCase 
     assertThat(oneTaskProcessFound).isTrue();
   }
 
+  @Test
   @Deployment
   public void testRollBackOnException() {
     Exception expectedException = null;

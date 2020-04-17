@@ -14,6 +14,8 @@
 package org.activiti.engine.impl.test;
 
 import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 import java.io.InputStream;
 import java.lang.reflect.Method;
@@ -21,11 +23,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import junit.framework.AssertionFailedError;
-
 import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.ProcessEngineConfiguration;
+import org.activiti.engine.RepositoryService;
 import org.activiti.engine.impl.ProcessEngineImpl;
 import org.activiti.engine.impl.bpmn.deployer.ResourceNameUtil;
 import org.activiti.engine.impl.bpmn.parser.factory.ActivityBehaviorFactory;
@@ -54,7 +55,7 @@ public abstract class TestHelper {
 
   public static final String EMPTY_LINE = "\n";
 
-  public static final List<String> TABLENAMES_EXCLUDED_FROM_DB_CLEAN_CHECK = singletonList("ACT_GE_PROPERTY");
+  private static final List<String> TABLENAMES_EXCLUDED_FROM_DB_CLEAN_CHECK = singletonList("ACT_GE_PROPERTY");
 
   static Map<String, ProcessEngine> processEngines = new HashMap<String, ProcessEngine>();
 
@@ -63,9 +64,9 @@ public abstract class TestHelper {
   public static void assertProcessEnded(ProcessEngine processEngine, String processInstanceId) {
     ProcessInstance processInstance = processEngine.getRuntimeService().createProcessInstanceQuery().processInstanceId(processInstanceId).singleResult();
 
-    if (processInstance != null) {
-      throw new AssertionFailedError("expected finished process instance '" + processInstanceId + "' but it was still in the db");
-    }
+    assertThat(processInstance)
+        .as("expected finished process instance '" + processInstanceId + "' but it was still in the db")
+        .isNull();
   }
 
   // Test annotation support /////////////////////////////////////////////
@@ -229,16 +230,26 @@ public abstract class TestHelper {
     processEngines.clear();
   }
 
+  public static void cleanUpDeployments() {
+    processEngines.values().forEach(processEngine -> cleanUpDeployments(processEngine.getRepositoryService()));
+  }
+
+  public static void cleanUpDeployments(RepositoryService repositoryService) {
+    repositoryService.createDeploymentQuery().list()
+      .forEach(deployment -> repositoryService.deleteDeployment(deployment.getId(), true));
+  }
+
   /**
-   * Each test is assumed to clean up all DB content it entered. After a test method executed, this method scans all tables to see if the DB is completely clean. It throws AssertionFailed in case the
-   * DB is not clean. If the DB is not clean, it is cleaned by performing a create a drop.
+   * Each test is assumed to clean up all DB content it entered. After a test method executed, this method scans all tables to see if the DB is completely clean.
+   * It fails in case the DB is not clean. If the DB is not clean, it is cleaned by performing a create a drop.
    */
   public static void assertAndEnsureCleanDb(ProcessEngine processEngine) {
     logger.debug("verifying that db is clean after test");
     Map<String, Long> tableCounts = processEngine.getManagementService().getTableCount();
     StringBuilder outputMessage = new StringBuilder();
     for (String tableName : tableCounts.keySet()) {
-      if (!TABLENAMES_EXCLUDED_FROM_DB_CLEAN_CHECK.contains(tableName)) {
+      String tableNameWithoutPrefix = tableName.replace(processEngine.getProcessEngineConfiguration().getDatabaseTablePrefix(), "");
+      if (!TABLENAMES_EXCLUDED_FROM_DB_CLEAN_CHECK.contains(tableNameWithoutPrefix)) {
         Long count = tableCounts.get(tableName);
         if (count != 0L) {
           outputMessage.append("  ").append(tableName).append(": ").append(count).append(" record(s) ");
@@ -259,7 +270,7 @@ public abstract class TestHelper {
         }
       });
 
-      throw new AssertionError(outputMessage.toString());
+      fail(outputMessage.toString());
     }
   }
 

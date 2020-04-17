@@ -2,11 +2,12 @@ package org.activiti.spring.test.autodeployment;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
-
+import org.activiti.engine.RepositoryService;
+import org.activiti.engine.impl.test.TestHelper;
 import org.activiti.spring.autodeployment.NeverFailAutoDeploymentStrategy;
 import org.activiti.spring.impl.test.SpringActivitiTestCase;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.ContextConfiguration;
@@ -20,21 +21,13 @@ public class NeverFailAutoDeploymentStrategyTest extends SpringActivitiTestCase 
     private final String invalidName1 = "org/activiti/spring/test/autodeployment/errorHandling/parsing-error.bpmn20.xml";
     private final String invalidName2 = "org/activiti/spring/test/autodeployment/errorHandling/validation-error.bpmn20.xml";
 
-    private void cleanUp() {
-        List<org.activiti.engine.repository.Deployment> deployments = repositoryService.createDeploymentQuery().list();
-        for (org.activiti.engine.repository.Deployment deployment : deployments) {
-            repositoryService.deleteDeployment(deployment.getId(), true);
-        }
-    }
+    @Autowired
+    private RepositoryService repositoryService;
 
     @Override
-    public void setUp(){
-        cleanUp();
-    }
-
-    @Override
-    public void tearDown(){
-        cleanUp();
+    public void setUp() {
+        super.setUp();
+        TestHelper.cleanUpDeployments(repositoryService);
     }
 
     @Test

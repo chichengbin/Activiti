@@ -17,6 +17,7 @@ import org.activiti.engine.task.Task;
 import org.activiti.engine.task.TaskQuery;
 import org.activiti.engine.test.Deployment;
 import org.activiti.spring.impl.test.SpringActivitiTestCase;
+import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 
 /**
@@ -26,22 +27,11 @@ import org.springframework.test.context.ContextConfiguration;
 @ContextConfiguration("classpath:org/activiti/spring/test/expression/callactivity/testCallActivityByExpression-context.xml")
 public class CallActivityBasedOnSpringBeansExpressionTest extends SpringActivitiTestCase {
 
-    private void cleanUp() {
-        List<org.activiti.engine.repository.Deployment> deployments = repositoryService.createDeploymentQuery().list();
-        for (org.activiti.engine.repository.Deployment deployment : deployments) {
-            repositoryService.deleteDeployment(deployment.getId(),
-                                               true);
-        }
-    }
-
-    @Override
-    public void tearDown() {
-        cleanUp();
-    }
-
-    @Deployment(resources = {"org/activiti/spring/test/expression/callactivity/CallActivityBasedOnSpringBeansExpressionTest.testCallActivityByExpression.bpmn20.xml",
-            "org/activiti/spring/test/expression/callactivity/simpleSubProcess.bpmn20.xml"})
-    public void testCallActivityByExpression() throws Exception {
+    @Test
+    @Deployment(resources = {
+        "org/activiti/spring/test/expression/callactivity/CallActivityBasedOnSpringBeansExpressionTest.testCallActivityByExpression.bpmn20.xml",
+        "org/activiti/spring/test/expression/callactivity/simpleSubProcess.bpmn20.xml"})
+    public void testCallActivityByExpression() {
         // Start process (main)
         ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("testCallActivityByExpression");
 
@@ -67,4 +57,5 @@ public class CallActivityBasedOnSpringBeansExpressionTest extends SpringActiviti
         taskService.complete(taskAfterSubProcess.getId());
         assertProcessEnded(processInstance.getId());
     }
+
 }

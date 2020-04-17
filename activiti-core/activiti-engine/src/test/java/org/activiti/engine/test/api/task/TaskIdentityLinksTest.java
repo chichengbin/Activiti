@@ -17,8 +17,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
-import junit.framework.AssertionFailedError;
-
 import org.activiti.engine.impl.history.HistoryLevel;
 import org.activiti.engine.impl.test.PluggableActivitiTestCase;
 import org.activiti.engine.task.Event;
@@ -28,8 +26,6 @@ import org.activiti.engine.task.Task;
 import org.activiti.engine.test.Deployment;
 
 /**
-
-
  */
 public class TaskIdentityLinksTest extends PluggableActivitiTestCase {
 
@@ -90,6 +86,7 @@ public class TaskIdentityLinksTest extends PluggableActivitiTestCase {
     if (processEngineConfiguration.getHistoryLevel().isAtLeast(HistoryLevel.AUDIT)) {
       List<Event> taskEvents = taskService.getTaskEvents(taskId);
       Event taskEvent = findTaskEvent(taskEvents, Event.ACTION_DELETE_GROUP_LINK);
+      assertThat(taskEvent).as("no task event found with action " + Event.ACTION_DELETE_GROUP_LINK).isNotNull();
       assertThat(taskEvent.getAction()).isEqualTo(Event.ACTION_DELETE_GROUP_LINK);
       List<String> taskEventMessageParts = taskEvent.getMessageParts();
       assertThat(taskEventMessageParts.get(0)).isEqualTo("muppets");
@@ -102,12 +99,9 @@ public class TaskIdentityLinksTest extends PluggableActivitiTestCase {
   }
 
   private Event findTaskEvent(List<Event> taskEvents, String action) {
-    for (Event event : taskEvents) {
-      if (action.equals(event.getAction())) {
-        return event;
-      }
-    }
-    throw new AssertionFailedError("no task event found with action " + action);
+    return taskEvents.stream()
+        .filter(event -> action.equals(event.getAction()))
+        .findFirst().get();
   }
 
   @Deployment(resources = "org/activiti/engine/test/api/task/IdentityLinksProcess.bpmn20.xml")

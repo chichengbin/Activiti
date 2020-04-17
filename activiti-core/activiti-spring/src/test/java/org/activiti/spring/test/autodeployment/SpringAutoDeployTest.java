@@ -99,7 +99,7 @@ public class SpringAutoDeployTest {
         String originalBpmnFileContent = IoUtil.readFileAsString(filePath);
         String updatedBpmnFileContent = originalBpmnFileContent.replace("flow1",
                                                                         "fromStartToEndFlow");
-        assertThat(updatedBpmnFileContent.length() > originalBpmnFileContent.length()).isTrue();
+        assertThat(updatedBpmnFileContent.length()).isGreaterThan(originalBpmnFileContent.length());
         IoUtil.writeStringToFile(updatedBpmnFileContent, filePath);
 
         // Classic produced/consumer problem here:

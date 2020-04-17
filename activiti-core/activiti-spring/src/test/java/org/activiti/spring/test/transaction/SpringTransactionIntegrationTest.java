@@ -23,6 +23,8 @@ import org.activiti.bpmn.exceptions.XMLException;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.test.Deployment;
 import org.activiti.spring.impl.test.SpringActivitiTestCase;
+import org.junit.After;
+import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
@@ -42,20 +44,7 @@ public class SpringTransactionIntegrationTest extends SpringActivitiTestCase {
   @Autowired
   protected DataSource dataSource;
 
-
-  private void cleanUp() {
-    List<org.activiti.engine.repository.Deployment> deployments = repositoryService.createDeploymentQuery().list();
-    for (org.activiti.engine.repository.Deployment deployment : deployments) {
-      repositoryService.deleteDeployment(deployment.getId(),
-                                         true);
-    }
-  }
-
-  @Override
-  public void tearDown() {
-    cleanUp();
-  }
-
+  @Test
   @Deployment
   public void testBasicActivitiSpringIntegration() {
     userBean.hello();
@@ -64,6 +53,7 @@ public class SpringTransactionIntegrationTest extends SpringActivitiTestCase {
     assertThat(runtimeService.getVariable(processInstance.getId(), "myVar")).isEqualTo("Hello from Printer!");
   }
 
+  @Test
   @Deployment
   public void testRollbackTransactionOnActivitiException() {
 
@@ -90,6 +80,7 @@ public class SpringTransactionIntegrationTest extends SpringActivitiTestCase {
     jdbcTemplate.execute("drop table MY_TABLE if exists;");
   }
 
+  @Test
   public void testRollBackOnDeployment() {
     // The second process should fail. None of the processes should be deployed, the first one should be rolled back
     assertThat(repositoryService.createProcessDefinitionQuery().count()).isEqualTo(0);

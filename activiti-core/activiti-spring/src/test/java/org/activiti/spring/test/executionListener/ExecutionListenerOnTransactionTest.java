@@ -13,6 +13,7 @@
 package org.activiti.spring.test.executionListener;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.util.HashMap;
 import java.util.List;
@@ -23,39 +24,24 @@ import org.activiti.engine.impl.history.HistoryLevel;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.test.Deployment;
 import org.activiti.spring.impl.test.SpringActivitiTestCase;
+import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 
 /**
-
  */
 @ContextConfiguration("classpath:org/activiti/spring/test/executionListener/TransactionDependentListenerTest-context.xml")
 public class ExecutionListenerOnTransactionTest extends SpringActivitiTestCase {
 
-    private void cleanUp() {
-        List<org.activiti.engine.repository.Deployment> deployments = repositoryService.createDeploymentQuery().list();
-        for (org.activiti.engine.repository.Deployment deployment : deployments) {
-            repositoryService.deleteDeployment(deployment.getId(),
-                                               true);
-        }
-    }
-
-    @Override
-    public void tearDown() {
-        cleanUp();
-    }
-
+    @Test
     @Deployment
     public void testOnClosedExecutionListenersWithRollback() {
 
         CurrentActivityTransactionDependentExecutionListener.clear();
 
         Map<String, Object> variables = new HashMap<>();
-        variables.put("serviceTask1",
-                      false);
-        variables.put("serviceTask2",
-                      false);
-        variables.put("serviceTask3",
-                      true);
+        variables.put("serviceTask1", false);
+        variables.put("serviceTask2", false);
+        variables.put("serviceTask3", true);
 
         processEngineConfiguration.setAsyncExecutorActivate(false);
 
@@ -63,11 +49,9 @@ public class ExecutionListenerOnTransactionTest extends SpringActivitiTestCase {
                                                                                    variables);
 
         // execute the only job that should be there 1 time
-        try {
-            managementService.executeJob(managementService.createJobQuery().singleResult().getId());
-        } catch (Exception ex) {
-            // expected; serviceTask3 throws exception
-        }
+        // expected: serviceTask3 throws exception
+        assertThatExceptionOfType(Exception.class)
+            .isThrownBy(() -> managementService.executeJob(managementService.createJobQuery().singleResult().getId()));
 
         List<CurrentActivityTransactionDependentExecutionListener.CurrentActivity> currentActivities = CurrentActivityTransactionDependentExecutionListener.getCurrentActivities();
         assertThat(currentActivities).hasSize(1);
@@ -83,23 +67,20 @@ public class ExecutionListenerOnTransactionTest extends SpringActivitiTestCase {
         assertThat(activeActivityIds.get(0)).isEqualTo("serviceTask2");
     }
 
+    @Test
     @Deployment
     public void testOnCloseFailureExecutionListenersWithRollback() {
 
         CurrentActivityTransactionDependentExecutionListener.clear();
 
         Map<String, Object> variables = new HashMap<>();
-        variables.put("serviceTask1",
-                      false);
-        variables.put("serviceTask2",
-                      false);
-        variables.put("serviceTask3",
-                      true);
+        variables.put("serviceTask1", false);
+        variables.put("serviceTask2", false);
+        variables.put("serviceTask3", true);
 
         processEngineConfiguration.setAsyncExecutorActivate(false);
 
-        runtimeService.startProcessInstanceByKey("transactionDependentExecutionListenerProcess",
-                                                 variables);
+        runtimeService.startProcessInstanceByKey("transactionDependentExecutionListenerProcess", variables);
 
         // execute the only job that should be there 1 time
         try {
@@ -120,6 +101,7 @@ public class ExecutionListenerOnTransactionTest extends SpringActivitiTestCase {
         assertThat(currentActivities.get(1).getActivityName()).isEqualTo("Service Task 3");
     }
 
+    @Test
     @Deployment
     public void testOnClosedExecutionListenersWithExecutionVariables() {
 
@@ -145,6 +127,7 @@ public class ExecutionListenerOnTransactionTest extends SpringActivitiTestCase {
         assertThat(currentActivities.get(2).getExecutionVariables().get("injectedExecutionVariable")).isEqualTo("test2");
     }
 
+    @Test
     @Deployment
     public void testOnCloseFailureExecutionListenersWithTransactionalOperation() throws InterruptedException {
 
@@ -177,6 +160,7 @@ public class ExecutionListenerOnTransactionTest extends SpringActivitiTestCase {
         assertThat(currentActivities.get(0).getActivityName()).isEqualTo("Service Task 1");
     }
 
+    @Test
     @Deployment
     public void testOnClosedExecutionListenersWithCustomPropertiesResolver() {
 
@@ -192,4 +176,5 @@ public class ExecutionListenerOnTransactionTest extends SpringActivitiTestCase {
         assertThat(currentActivities.get(0).getCustomPropertiesMap()).hasSize(1);
         assertThat(currentActivities.get(0).getCustomPropertiesMap().get("customProp1")).isEqualTo("serviceTask1");
     }
+
 }

@@ -16,13 +16,13 @@ package org.activiti.spring.test.fieldinjection;
 import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
 import java.util.Map;
 
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.test.Deployment;
 import org.activiti.spring.impl.test.SpringActivitiTestCase;
+import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 
 /**
@@ -30,19 +30,7 @@ import org.springframework.test.context.ContextConfiguration;
 @ContextConfiguration("classpath:org/activiti/spring/test/fieldinjection/fieldInjectionSpringTest-context.xml")
 public class ListenerFieldInjectionTest extends SpringActivitiTestCase {
 
-    private void cleanUp() {
-        List<org.activiti.engine.repository.Deployment> deployments = repositoryService.createDeploymentQuery().list();
-        for (org.activiti.engine.repository.Deployment deployment : deployments) {
-            repositoryService.deleteDeployment(deployment.getId(),
-                                               true);
-        }
-    }
-
-    @Override
-    public void tearDown() {
-        cleanUp();
-    }
-
+    @Test
     @Deployment
     public void testDelegateExpressionListenerFieldInjection() {
       ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("listenerFieldInjection", singletonMap("startValue", 42));

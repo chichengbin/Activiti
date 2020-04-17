@@ -18,14 +18,14 @@
         <property name="defaultAutoCommit" value="false"/>
     </bean>
 
-    <tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="false"/>
+    <tx:annotation-driven  proxy-target-class="false"/>
     <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
         <property name="entityManagerFactory" ref="entityManagerFactory"/>
     </bean>
 
     <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
         <property name="dataSource" ref="dataSource"/>
-        <property name="persistenceXmlLocation" value="classpath:/org/activiti/spring/test/jpa/custom-persistence.xml"/>
+        <property name="persistenceXmlLocation" value="classpath:org/activiti/spring/test/jpa/custom-persistence.xml"/>
         <property name="jpaVendorAdapter">
             <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
                 <property name="databasePlatform" value="org.hibernate.dialect.H2Dialect"/>

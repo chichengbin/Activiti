@@ -17,8 +17,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
-import junit.framework.AssertionFailedError;
-
 import org.activiti.engine.impl.history.HistoryLevel;
 import org.activiti.engine.impl.test.PluggableActivitiTestCase;
 import org.activiti.engine.task.Event;
@@ -86,9 +84,11 @@ public class ProcessInstanceIdentityLinksTest extends PluggableActivitiTestCase 
 
     if (processEngineConfiguration.getHistoryLevel().isAtLeast(HistoryLevel.AUDIT)) {
       List<Event> processInstanceEvents = runtimeService.getProcessInstanceEvents(processInstanceId);
-      Event processIsntanceEvent = findProcessInstanceEvent(processInstanceEvents, Event.ACTION_DELETE_GROUP_LINK);
-      assertThat(processIsntanceEvent.getAction()).isEqualTo(Event.ACTION_DELETE_GROUP_LINK);
-      List<String> processInstanceEventMessageParts = processIsntanceEvent.getMessageParts();
+
+      Event processInstanceEvent = findProcessInstanceEvent(processInstanceEvents, Event.ACTION_DELETE_GROUP_LINK);
+      assertThat(processInstanceEvent).as("no process instance event found with action " + Event.ACTION_DELETE_GROUP_LINK).isNotNull();
+
+      List<String> processInstanceEventMessageParts = processInstanceEvent.getMessageParts();
       assertThat(processInstanceEventMessageParts.get(0)).isEqualTo("muppets");
       assertThat(processInstanceEventMessageParts.get(1)).isEqualTo(IdentityLinkType.PARTICIPANT);
       assertThat(processInstanceEventMessageParts).hasSize(2);
@@ -99,12 +99,10 @@ public class ProcessInstanceIdentityLinksTest extends PluggableActivitiTestCase 
   }
 
   private Event findProcessInstanceEvent(List<Event> processInstanceEvents, String action) {
-    for (Event event : processInstanceEvents) {
-      if (action.equals(event.getAction())) {
-        return event;
-      }
-    }
-    throw new AssertionFailedError("no process instance event found with action " + action);
+      return processInstanceEvents.stream()
+          .filter(event -> action.equals(event.getAction()))
+          .findFirst()
+          .get();
   }
 
   @Deployment(resources = "org/activiti/engine/test/api/runtime/IdentityLinksProcess.bpmn20.xml")

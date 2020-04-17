@@ -20,6 +20,7 @@ import java.util.Map;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.test.Deployment;
 import org.activiti.spring.impl.test.SpringActivitiTestCase;
+import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 
 
@@ -28,6 +29,7 @@ import org.springframework.test.context.ContextConfiguration;
 @ContextConfiguration("classpath:org/activiti/spring/test/fieldinjection/fieldInjectionSpringTest-context.xml")
 public class ServiceTaskFieldInjectionTest extends SpringActivitiTestCase {
 
+    @Test
     @Deployment
     public void testDelegateExpressionWithSingletonBean() {
       runtimeService.startProcessInstanceByKey("delegateExpressionSingleton", singletonMap("input", 100));
@@ -44,6 +46,7 @@ public class ServiceTaskFieldInjectionTest extends SpringActivitiTestCase {
       assertThat(SingletonDelegateExpressionBean.INSTANCE_COUNT.get()).isEqualTo(1);
     }
 
+    @Test
     @Deployment
     public void testDelegateExpressionWithPrototypeBean() {
       runtimeService.startProcessInstanceByKey("delegateExpressionPrototype", singletonMap("input", 100));

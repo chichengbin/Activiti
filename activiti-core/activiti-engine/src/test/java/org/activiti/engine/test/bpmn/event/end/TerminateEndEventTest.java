@@ -984,40 +984,4 @@ public class TerminateEndEventTest extends PluggableActivitiTestCase {
     }
   }
 
-  protected void assertHistoricTasksDeleteReason(ProcessInstance processInstance, String expectedDeleteReason, String ... taskNames) {
-    if (processEngineConfiguration.getHistoryLevel().isAtLeast(HistoryLevel.AUDIT)) {
-      for (String taskName : taskNames) {
-        List<HistoricTaskInstance> historicTaskInstances = historyService.createHistoricTaskInstanceQuery()
-            .processInstanceId(processInstance.getId()).taskName(taskName).list();
-        assertThat(historicTaskInstances.size() > 0).isTrue();
-        for (HistoricTaskInstance historicTaskInstance : historicTaskInstances) {
-          assertThat(historicTaskInstance.getEndTime()).isNotNull();
-          if (expectedDeleteReason == null) {
-            assertThat(historicTaskInstance.getDeleteReason()).isNull();
-          } else {
-            assertThat(historicTaskInstance.getDeleteReason().startsWith(expectedDeleteReason)).isTrue();
-          }
-        }
-      }
-    }
-  }
-
-  protected void assertHistoricActivitiesDeleteReason(ProcessInstance processInstance, String expectedDeleteReason, String ... activityIds) {
-    if (processEngineConfiguration.getHistoryLevel().isAtLeast(HistoryLevel.AUDIT)) {
-      for (String activityId : activityIds) {
-        List<HistoricActivityInstance> historicActiviyInstances = historyService.createHistoricActivityInstanceQuery()
-            .activityId(activityId).processInstanceId(processInstance.getId()).list();
-        assertThat(historicActiviyInstances.size() > 0).isTrue();
-        for (HistoricActivityInstance historicActiviyInstance : historicActiviyInstances) {
-          assertThat(historicActiviyInstance.getEndTime()).isNotNull();
-          if (expectedDeleteReason == null) {
-            assertThat(historicActiviyInstance.getDeleteReason()).isNull();
-          } else {
-            assertThat(historicActiviyInstance.getDeleteReason().startsWith(expectedDeleteReason)).isTrue();
-          }
-        }
-      }
-    }
-  }
-
 }

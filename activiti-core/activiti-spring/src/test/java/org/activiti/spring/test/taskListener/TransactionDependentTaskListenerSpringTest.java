@@ -18,6 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.test.Deployment;
 import org.activiti.spring.impl.test.SpringActivitiTestCase;
+import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -30,6 +31,7 @@ public class TransactionDependentTaskListenerSpringTest extends SpringActivitiTe
   @Autowired
   MyTransactionDependentTaskListener listener;
 
+  @Test
   @Deployment
   public void testCustomPropertiesMapDelegateExpression() {
     runtimeService.startProcessInstanceByKey("transactionDependentTaskListenerProcess");

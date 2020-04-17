@@ -15,10 +15,9 @@ package org.activiti.spring.test.taskassignment;
 import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
-
 import org.activiti.engine.test.Deployment;
 import org.activiti.spring.impl.test.SpringActivitiTestCase;
+import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 
 /**
@@ -26,18 +25,7 @@ import org.springframework.test.context.ContextConfiguration;
 @ContextConfiguration("classpath:org/activiti/spring/test/taskassignment/taskassignment-context.xml")
 public class CustomTaskAssignmentTest extends SpringActivitiTestCase {
 
-    private void cleanUp() {
-        List<org.activiti.engine.repository.Deployment> deployments = repositoryService.createDeploymentQuery().list();
-        for (org.activiti.engine.repository.Deployment deployment : deployments) {
-            repositoryService.deleteDeployment(deployment.getId(), true);
-        }
-    }
-
-    @Override
-    public void tearDown() {
-        cleanUp();
-    }
-
+    @Test
     @Deployment
     public void testSetAssigneeThroughSpringService() {
         runtimeService.startProcessInstanceByKey("assigneeThroughSpringService",
@@ -45,6 +33,7 @@ public class CustomTaskAssignmentTest extends SpringActivitiTestCase {
         assertThat(taskService.createTaskQuery().taskAssignee("Kermit The Frog").count()).isEqualTo(1);
     }
 
+    @Test
     @Deployment
     public void testSetCandidateUsersThroughSpringService() {
         runtimeService.startProcessInstanceByKey("candidateUsersThroughSpringService",
@@ -55,6 +44,7 @@ public class CustomTaskAssignmentTest extends SpringActivitiTestCase {
         assertThat(taskService.createTaskQuery().taskCandidateUser("mispiggy").count()).isEqualTo(0);
     }
 
+    @Test
     @Deployment
     public void testSetCandidateGroupsThroughSpringService() {
         runtimeService.startProcessInstanceByKey("candidateUsersThroughSpringService",
@@ -64,4 +54,5 @@ public class CustomTaskAssignmentTest extends SpringActivitiTestCase {
         assertThat(taskService.createTaskQuery().taskCandidateGroup("accountancy").count()).isEqualTo(1);
         assertThat(taskService.createTaskQuery().taskCandidateGroup("sales").count()).isEqualTo(0);
     }
+
 }
