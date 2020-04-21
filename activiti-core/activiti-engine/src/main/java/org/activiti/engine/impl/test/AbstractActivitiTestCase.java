@@ -13,7 +13,6 @@
 
 package org.activiti.engine.impl.test;
 
-import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
@@ -70,9 +69,6 @@ public abstract class AbstractActivitiTestCase extends TestCase {
   protected void setUp() throws Exception {
     // Always reset authenticated user to avoid any mistakes
     Authentication.setAuthenticatedUserId(null);
-  }
-
-  protected void tearDown() throws Exception {
   }
 
   protected abstract void initializeProcessEngine();

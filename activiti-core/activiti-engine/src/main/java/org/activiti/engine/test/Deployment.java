@@ -16,7 +16,6 @@ package org.activiti.engine.test;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import org.activiti.engine.api.internal.Internal;
-import org.junit.Test;
 
 /**
  * Annotation for a test method to create and delete a deployment around a test method.

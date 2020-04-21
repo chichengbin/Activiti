@@ -4,7 +4,6 @@ import static java.util.Collections.emptyMap;
 import static org.activiti.engine.impl.test.TestHelper.cleanUpDeployments;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
 import java.util.Properties;
 
 import javax.mail.NoSuchProviderException;
