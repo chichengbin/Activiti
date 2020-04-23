@@ -13,7 +13,7 @@
 
 package org.activiti.engine.test.bpmn.event.message;
 
-import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
+import static org.activiti.engine.impl.test.Assertions.assertProcessEnded;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.activiti.engine.impl.EventSubscriptionQueryImpl;

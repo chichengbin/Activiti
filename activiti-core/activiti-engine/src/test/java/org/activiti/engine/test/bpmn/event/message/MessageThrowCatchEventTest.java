@@ -12,7 +12,7 @@
  */
 package org.activiti.engine.test.bpmn.event.message;
 
-import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
+import static org.activiti.engine.impl.test.Assertions.assertProcessEnded;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.assertj.core.api.Assertions.entry;
@@ -40,7 +40,6 @@ import org.activiti.engine.impl.delegate.ThrowMessageDelegate;
 import org.activiti.engine.impl.delegate.ThrowMessageDelegateFactory;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.persistence.entity.EventSubscriptionEntity;
-import org.activiti.engine.impl.test.ResourceActivitiTestCase;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.test.ActivitiRule;
 import org.activiti.engine.test.Deployment;

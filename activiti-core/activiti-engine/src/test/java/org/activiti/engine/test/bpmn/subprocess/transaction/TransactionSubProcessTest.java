@@ -13,8 +13,7 @@
 
 package org.activiti.engine.test.bpmn.subprocess.transaction;
 
-import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
-import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
+import static org.activiti.engine.impl.test.Assertions.assertProcessEnded;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 

@@ -15,7 +15,7 @@ package org.activiti.engine.test.history;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonMap;
-import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
+import static org.activiti.engine.impl.test.Assertions.assertProcessEnded;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.groups.Tuple.tuple;
 

@@ -13,7 +13,7 @@
 
 package org.activiti.engine.test.api.identity;
 
-import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
+import static org.activiti.engine.impl.test.Assertions.assertProcessEnded;
 
 import org.activiti.engine.impl.identity.Authentication;
 import org.activiti.engine.impl.test.PluggableActivitiTestCase;

@@ -13,7 +13,7 @@
 
 package org.activiti.spring.test.servicetask;
 
-import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
+import static org.activiti.engine.impl.test.Assertions.assertProcessEnded;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.activiti.engine.task.Task;

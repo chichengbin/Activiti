@@ -23,8 +23,8 @@ import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.GraphicInfo;
 import org.activiti.bpmn.model.Process;
 import org.activiti.bpmn.model.SequenceFlow;
+import org.activiti.engine.impl.test.AnnotationSupport;
 import org.activiti.engine.impl.test.PluggableActivitiTestCase;
-import org.activiti.engine.impl.test.TestHelper;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.test.Deployment;
 
@@ -36,7 +36,7 @@ public class BpmnParseTest extends PluggableActivitiTestCase {
   public void testInvalidProcessDefinition() {
     assertThatExceptionOfType(XMLException.class)
       .isThrownBy(() -> {
-        String resource = TestHelper.getBpmnProcessDefinitionResource(getClass(), "testInvalidProcessDefinition");
+        String resource = AnnotationSupport.getBpmnProcessDefinitionResource(getClass(), "testInvalidProcessDefinition");
         repositoryService.createDeployment().name(resource).addClasspathResource(resource).deploy();
       });
   }

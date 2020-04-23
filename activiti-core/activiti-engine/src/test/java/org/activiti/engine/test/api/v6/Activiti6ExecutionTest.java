@@ -12,7 +12,7 @@
  */
 package org.activiti.engine.test.api.v6;
 
-import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
+import static org.activiti.engine.impl.test.Assertions.assertProcessEnded;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
@@ -24,8 +24,6 @@ import org.activiti.engine.delegate.event.ActivitiEvent;
 import org.activiti.engine.delegate.event.ActivitiEventListener;
 import org.activiti.engine.history.HistoricActivityInstance;
 import org.activiti.engine.impl.history.HistoryLevel;
-import org.activiti.engine.impl.test.PluggableActivitiTestCase;
-import org.activiti.engine.impl.test.TestHelper;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;

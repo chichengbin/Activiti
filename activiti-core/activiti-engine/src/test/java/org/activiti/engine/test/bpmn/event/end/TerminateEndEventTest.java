@@ -15,9 +15,9 @@ package org.activiti.engine.test.bpmn.event.end;
 
 import static java.util.Arrays.asList;
 import static org.activiti.engine.impl.test.JobTestHelper.waitForJobExecutorToProcessAllJobs;
-import static org.activiti.engine.impl.test.TestHelper.assertHistoricActivitiesDeleteReason;
-import static org.activiti.engine.impl.test.TestHelper.assertHistoricTasksDeleteReason;
-import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
+import static org.activiti.engine.impl.test.Assertions.assertHistoricActivitiesDeleteReason;
+import static org.activiti.engine.impl.test.Assertions.assertHistoricTasksDeleteReason;
+import static org.activiti.engine.impl.test.Assertions.assertProcessEnded;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Date;
@@ -33,8 +33,8 @@ import org.activiti.engine.delegate.JavaDelegate;
 import org.activiti.engine.history.DeleteReason;
 import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.impl.history.HistoryLevel;
+import org.activiti.engine.impl.test.Assertions;
 import org.activiti.engine.impl.test.PluggableActivitiTestCase;
-import org.activiti.engine.impl.test.TestHelper;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.ProcessInstance;
@@ -321,8 +321,8 @@ public class TerminateEndEventTest extends PluggableActivitiTestCase {
         assertProcessEnded(processEngine, pi.getId());
 
         assertHistoricProcessInstanceDeleteReason(pi, DeleteReason.TERMINATE_END_EVENT);
-        TestHelper.assertHistoricTasksDeleteReason(processEngine, pi, DeleteReason.TERMINATE_END_EVENT, "check before normal end");
-        TestHelper.assertHistoricActivitiesDeleteReason(processEngine, pi, DeleteReason.TERMINATE_END_EVENT, "outerTask");
+        Assertions.assertHistoricTasksDeleteReason(processEngine, pi, DeleteReason.TERMINATE_END_EVENT, "check before normal end");
+        Assertions.assertHistoricActivitiesDeleteReason(processEngine, pi, DeleteReason.TERMINATE_END_EVENT, "outerTask");
 
         // Test terminating subprocess
 

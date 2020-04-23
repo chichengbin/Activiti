@@ -19,8 +19,8 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import java.util.List;
 
 import org.activiti.bpmn.exceptions.XMLException;
+import org.activiti.engine.impl.test.AnnotationSupport;
 import org.activiti.engine.impl.test.PluggableActivitiTestCase;
-import org.activiti.engine.impl.test.TestHelper;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.task.TaskQuery;
 import org.activiti.engine.test.Deployment;
@@ -50,7 +50,7 @@ public class TaskAssignmentExtensionsTest extends PluggableActivitiTestCase {
   }
 
   public void testDuplicateAssigneeDeclaration() {
-    String resource = TestHelper.getBpmnProcessDefinitionResource(getClass(), "testDuplicateAssigneeDeclaration");
+    String resource = AnnotationSupport.getBpmnProcessDefinitionResource(getClass(), "testDuplicateAssigneeDeclaration");
     assertThatExceptionOfType(XMLException.class)
       .as("Invalid BPMN 2.0 process should not parse, but it gets parsed successfully")
       .isThrownBy(() -> repositoryService.createDeployment().addClasspathResource(resource).deploy());

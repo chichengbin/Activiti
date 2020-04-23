@@ -85,11 +85,11 @@ public abstract class AbstractActivitiTestCase extends TestCase {
 
     try {
 
-      deploymentIdFromDeploymentAnnotation = TestHelper.annotationDeploymentSetUp(processEngine, getClass(), getName());
+      deploymentIdFromDeploymentAnnotation = AnnotationSupport.annotationDeploymentSetUp(processEngine, getClass(), getName());
 
       super.runBare();
 
-      TestHelper.assertHistoryData(processEngine);
+      Assertions.assertHistoryData(processEngine);
 
     } catch (AssertionError e) {
       logger.error("ASSERTION FAILED: {}", e, e);
@@ -104,7 +104,7 @@ public abstract class AbstractActivitiTestCase extends TestCase {
     } finally {
 
       if (deploymentIdFromDeploymentAnnotation != null) {
-        TestHelper.annotationDeploymentTearDown(processEngine, deploymentIdFromDeploymentAnnotation, getClass(), getName());
+        AnnotationSupport.annotationDeploymentTearDown(processEngine, deploymentIdFromDeploymentAnnotation, getClass(), getName());
         deploymentIdFromDeploymentAnnotation = null;
       }
 
@@ -126,7 +126,7 @@ public abstract class AbstractActivitiTestCase extends TestCase {
    * It fails in case the DB is not clean. If the DB is not clean, it is cleaned by performing a create a drop.
    */
   protected void assertAndEnsureCleanDb() {
-    TestHelper.assertAndEnsureCleanDb(processEngine);
+    TestHelper.ensureCleanDb(processEngine);
   }
 
   protected void initializeServices() {

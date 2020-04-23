@@ -1,7 +1,7 @@
 package org.activiti.examples.bpmn.usertask;
 
 import static java.util.Arrays.asList;
-import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
+import static org.activiti.engine.impl.test.Assertions.assertProcessEnded;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;

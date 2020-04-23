@@ -15,7 +15,7 @@ package org.activiti.engine.test.bpmn.callactivity;
 
 import static java.util.Arrays.asList;
 import static org.activiti.engine.impl.test.JobTestHelper.waitForJobExecutorToProcessAllJobs;
-import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
+import static org.activiti.engine.impl.test.Assertions.assertProcessEnded;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Date;
@@ -27,8 +27,8 @@ import org.activiti.engine.history.DeleteReason;
 import org.activiti.engine.history.HistoricActivityInstance;
 import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.impl.history.HistoryLevel;
+import org.activiti.engine.impl.test.Assertions;
 import org.activiti.engine.impl.test.PluggableActivitiTestCase;
-import org.activiti.engine.impl.test.TestHelper;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.task.TaskQuery;
@@ -248,9 +248,9 @@ public class CallActivityAdvancedTest extends PluggableActivitiTestCase {
     if (processEngineConfiguration.getHistoryLevel().isAtLeast(HistoryLevel.AUDIT)) {
       assertThat(historyService.createHistoricProcessInstanceQuery().processInstanceId(pi2.getId()).singleResult()
           .getDeleteReason()).startsWith(DeleteReason.BOUNDARY_EVENT_INTERRUPTING);
-      TestHelper.assertHistoricTasksDeleteReason(processEngine, pi2, DeleteReason.BOUNDARY_EVENT_INTERRUPTING, "Task in subprocess");
-      TestHelper.assertHistoricActivitiesDeleteReason(processEngine, pi1, DeleteReason.BOUNDARY_EVENT_INTERRUPTING, "callSubProcess");
-      TestHelper.assertHistoricActivitiesDeleteReason(processEngine, pi2, DeleteReason.BOUNDARY_EVENT_INTERRUPTING, "task");
+      Assertions.assertHistoricTasksDeleteReason(processEngine, pi2, DeleteReason.BOUNDARY_EVENT_INTERRUPTING, "Task in subprocess");
+      Assertions.assertHistoricActivitiesDeleteReason(processEngine, pi1, DeleteReason.BOUNDARY_EVENT_INTERRUPTING, "callSubProcess");
+      Assertions.assertHistoricActivitiesDeleteReason(processEngine, pi2, DeleteReason.BOUNDARY_EVENT_INTERRUPTING, "task");
     }
   }
 

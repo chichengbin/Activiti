@@ -26,7 +26,7 @@ import org.activiti.engine.task.Task;
 import org.activiti.engine.test.Deployment;
 
 import static java.util.Collections.singletonMap;
-import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
+import static org.activiti.engine.impl.test.Assertions.assertProcessEnded;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 

@@ -14,7 +14,7 @@
 package org.activiti.engine.test.bpmn.gateway;
 
 import static org.activiti.engine.impl.test.JobTestHelper.waitForJobExecutorToProcessAllJobs;
-import static org.activiti.engine.impl.test.TestHelper.assertHistoricActivitiesDeleteReason;
+import static org.activiti.engine.impl.test.Assertions.assertHistoricActivitiesDeleteReason;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -24,7 +24,6 @@ import org.activiti.engine.history.DeleteReason;
 import org.activiti.engine.impl.EventSubscriptionQueryImpl;
 import org.activiti.engine.impl.persistence.entity.EventSubscriptionEntity;
 import org.activiti.engine.impl.test.PluggableActivitiTestCase;
-import org.activiti.engine.impl.test.TestHelper;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.Job;
 import org.activiti.engine.runtime.ProcessInstance;

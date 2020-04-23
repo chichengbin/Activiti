@@ -14,9 +14,7 @@
 package org.activiti.engine.test.bpmn.event.timer;
 
 import static org.activiti.engine.impl.test.JobTestHelper.waitForJobExecutorToProcessAllJobs;
-import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
-import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
-import static org.activiti.engine.impl.test.TestHelper.assertProcessEndedHistoryData;
+import static org.activiti.engine.impl.test.Assertions.assertProcessEnded;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Collections;

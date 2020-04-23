@@ -14,15 +14,12 @@
 package org.activiti.engine.test.bpmn.event.message;
 
 import static org.activiti.engine.impl.test.JobTestHelper.waitForJobExecutorOnCondition;
-import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
-import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
-import static org.activiti.engine.impl.test.TestHelper.assertProcessEndedHistoryData;
+import static org.activiti.engine.impl.test.Assertions.assertProcessEnded;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import org.activiti.engine.impl.test.PluggableActivitiTestCase;
 import org.activiti.engine.runtime.Execution;
