@@ -14,6 +14,7 @@ package org.activiti.engine.test.api.event;
 
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toList;
+import static org.activiti.engine.impl.test.JobTestHelper.waitForJobExecutorToProcessAllJobs;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
@@ -482,7 +483,7 @@ public class ActivityEventsTest extends PluggableActivitiTestCase {
     Calendar tomorrow = Calendar.getInstance();
     tomorrow.add(Calendar.DAY_OF_YEAR, 1);
     processEngineConfiguration.getClock().setCurrentTime(tomorrow.getTime());
-    waitForJobExecutorToProcessAllJobs(2000, 1000);
+    waitForJobExecutorToProcessAllJobs(processEngine, 2000, 1000);
 
     // Check timeout has been dispatched
     assertThat(listener.getEventsReceived()).hasSize(1);
@@ -502,7 +503,7 @@ public class ActivityEventsTest extends PluggableActivitiTestCase {
     timeToFire.add(Calendar.HOUR, 2);
     timeToFire.add(Calendar.SECOND, 5);
     processEngineConfiguration.getClock().setCurrentTime(timeToFire.getTime());
-    waitForJobExecutorToProcessAllJobs(2000, 200);
+    waitForJobExecutorToProcessAllJobs(processEngine, 2000, 200);
 
     // Check timeout-events have been dispatched
     assertThat(listener.getEventsReceived()).hasSize(4);
@@ -529,7 +530,7 @@ public class ActivityEventsTest extends PluggableActivitiTestCase {
     timeToFire.add(Calendar.HOUR, 2);
     timeToFire.add(Calendar.MINUTE, 5);
     processEngineConfiguration.getClock().setCurrentTime(timeToFire.getTime());
-    waitForJobExecutorToProcessAllJobs(5000, 500);
+    waitForJobExecutorToProcessAllJobs(processEngine, 5000, 500);
 
     // Check timeout-events have been dispatched
     assertThat(listener.getEventsReceived())

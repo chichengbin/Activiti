@@ -26,6 +26,7 @@ import org.activiti.engine.task.Task;
 import org.activiti.engine.test.Deployment;
 
 import static java.util.Collections.singletonMap;
+import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -120,7 +121,7 @@ public class BoundaryErrorEventTest extends PluggableActivitiTestCase {
     Task task = taskService.createTaskQuery().singleResult();
     assertThat(task.getName()).isEqualTo("task D");
     taskService.complete(task.getId());
-    assertProcessEnded(procId);
+    assertProcessEnded(processEngine, procId);
 
     // Completing task B will lead to task C
     runtimeService.startProcessInstanceByKey(processDefinitionKey).getId();
@@ -153,7 +154,7 @@ public class BoundaryErrorEventTest extends PluggableActivitiTestCase {
     Task task = taskService.createTaskQuery().singleResult();
     assertThat(task.getName()).isEqualTo("Nested task");
     taskService.complete(task.getId(), singletonMap("input", 1));
-    assertProcessEnded(procId);
+    assertProcessEnded(processEngine, procId);
 
     // Input == 2 -> error2 will be thrown, leading to a userTask outside
     // all subprocesses
@@ -164,7 +165,7 @@ public class BoundaryErrorEventTest extends PluggableActivitiTestCase {
     task = taskService.createTaskQuery().singleResult();
     assertThat(task.getName()).isEqualTo("task after catch");
     taskService.complete(task.getId());
-    assertProcessEnded(procId);
+    assertProcessEnded(processEngine, procId);
   }
 
   @Deployment
@@ -172,7 +173,7 @@ public class BoundaryErrorEventTest extends PluggableActivitiTestCase {
     // input == 1 -> error2 is thrown -> caught on subprocess2 -> end event
     // in subprocess -> proc inst end 1
     String procId = runtimeService.startProcessInstanceByKey("deeplyNestedErrorThrown", singletonMap("input", 1)).getId();
-    assertProcessEnded(procId);
+    assertProcessEnded(processEngine, procId);
 
     HistoricProcessInstance hip;
     if (processEngineConfiguration.getHistoryLevel().isAtLeast(HistoryLevel.ACTIVITY)) {
@@ -182,7 +183,7 @@ public class BoundaryErrorEventTest extends PluggableActivitiTestCase {
     // input == 2 -> error2 is thrown -> caught on subprocess1 -> proc inst
     // end 2
     procId = runtimeService.startProcessInstanceByKey("deeplyNestedErrorThrown", singletonMap("input", 1)).getId();
-    assertProcessEnded(procId);
+    assertProcessEnded(processEngine, procId);
 
     if (processEngineConfiguration.getHistoryLevel().isAtLeast(HistoryLevel.ACTIVITY)) {
       hip = historyService.createHistoricProcessInstanceQuery().processInstanceId(procId).singleResult();
@@ -205,7 +206,7 @@ public class BoundaryErrorEventTest extends PluggableActivitiTestCase {
 
     // Completing the task will end the process instance
     taskService.complete(task.getId());
-    assertProcessEnded(procId);
+    assertProcessEnded(processEngine, procId);
   }
 
   @Deployment(resources = { "org/activiti/engine/test/bpmn/event/error/BoundaryErrorEventTest.subprocess.bpmn20.xml" })
@@ -251,7 +252,7 @@ public class BoundaryErrorEventTest extends PluggableActivitiTestCase {
 
     // Completing the task will end the process instance
     taskService.complete(task.getId());
-    assertProcessEnded(procId);
+    assertProcessEnded(processEngine, procId);
   }
 
   @Deployment(resources = { "org/activiti/engine/test/bpmn/event/error/BoundaryErrorEventTest.testCatchErrorThrownByCallActivityOnCallActivity.bpmn20.xml",
@@ -269,7 +270,7 @@ public class BoundaryErrorEventTest extends PluggableActivitiTestCase {
 
     // Completing the task will end the process instance
     taskService.complete(task.getId());
-    assertProcessEnded(procId);
+    assertProcessEnded(processEngine, procId);
   }
 
   @Deployment
@@ -289,7 +290,7 @@ public class BoundaryErrorEventTest extends PluggableActivitiTestCase {
     taskService.complete(tasks.get(1).getId(), vars);
 
     assertThat(taskService.createTaskQuery().count()).isEqualTo(0);
-    assertProcessEnded(procId);
+    assertProcessEnded(processEngine, procId);
   }
 
   @Deployment
@@ -307,7 +308,7 @@ public class BoundaryErrorEventTest extends PluggableActivitiTestCase {
     task = taskService.createTaskQuery().singleResult();
     taskService.complete(task.getId(), vars);
 
-    assertProcessEnded(procId);
+    assertProcessEnded(processEngine, procId);
   }
 
   @Deployment
@@ -369,21 +370,21 @@ public class BoundaryErrorEventTest extends PluggableActivitiTestCase {
   @Deployment(resources = { "org/activiti/engine/test/bpmn/event/error/BoundaryErrorEventTest.testCatchErrorOnGroovyScriptTask.bpmn20.xml" })
   public void testCatchErrorOnGroovyScriptTask() {
     String procId = runtimeService.startProcessInstanceByKey("catchErrorOnScriptTask").getId();
-    assertProcessEnded(procId);
+    assertProcessEnded(processEngine, procId);
   }
 
   @Deployment(resources = { "org/activiti/engine/test/bpmn/event/error/BoundaryErrorEventTest.testCatchErrorOnJavaScriptScriptTask.bpmn20.xml" })
   public void testCatchErrorOnJavaScriptScriptTask() {
     if (JvmUtil.isAtLeastJDK7()) {
       String procId = runtimeService.startProcessInstanceByKey("catchErrorOnScriptTask").getId();
-      assertProcessEnded(procId);
+      assertProcessEnded(processEngine, procId);
     }
   }
 
   @Deployment(resources = { "org/activiti/engine/test/bpmn/event/error/BoundaryErrorEventTest.testUncaughtErrorOnScriptTaskWithEmptyErrorEventDefinition.bpmn20.xml" })
   public void testUncaughtErrorOnScriptTaskWithEmptyErrorEventDefinition() {
     String procId = runtimeService.startProcessInstanceByKey("uncaughtErrorOnScriptTaskWithEmptyErrorEventDefinition").getId();
-    assertProcessEnded(procId);
+    assertProcessEnded(processEngine, procId);
   }
 
   @Deployment(resources = { "org/activiti/engine/test/bpmn/event/error/BoundaryErrorEventTest.testUncaughtErrorOnScriptTask.bpmn20.xml" })
@@ -425,7 +426,7 @@ public class BoundaryErrorEventTest extends PluggableActivitiTestCase {
 
     // Completing the task will end the process instance
     taskService.complete(task.getId());
-    assertProcessEnded(procId);
+    assertProcessEnded(processEngine, procId);
   }
 
   @Deployment

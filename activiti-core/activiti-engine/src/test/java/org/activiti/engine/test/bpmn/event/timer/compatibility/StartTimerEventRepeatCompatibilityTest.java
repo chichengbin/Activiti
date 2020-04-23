@@ -1,10 +1,3 @@
-package org.activiti.engine.test.bpmn.event.timer.compatibility;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.Calendar;
-import java.util.List;
-
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +10,16 @@ import java.util.List;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.activiti.engine.test.bpmn.event.timer.compatibility;
+
+import static org.activiti.engine.impl.test.JobTestHelper.executeJobExecutorForTime;
+import static org.activiti.engine.impl.test.JobTestHelper.waitForJobExecutorToProcessAllJobsAndExecutableTimerJobs;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
+import java.util.Calendar;
+import java.util.List;
 
 import org.activiti.engine.delegate.event.ActivitiEvent;
 import org.activiti.engine.delegate.event.ActivitiEventType;
@@ -89,7 +92,7 @@ public class StartTimerEventRepeatCompatibilityTest extends TimerEventCompatibil
     // advance the clock after 9 days from starting the process ->
     // the system will execute the pending job and will create a new one (day by day)
     moveByMinutes(9 * 60 * 24);
-    executeJobExecutorForTime(10000, 200);
+    executeJobExecutorForTime(processEngine, 10000, 200);
 
     // there must be a pending job because the endDate is not reached yet
     jobs = managementService.createTimerJobQuery().list();
@@ -116,7 +119,7 @@ public class StartTimerEventRepeatCompatibilityTest extends TimerEventCompatibil
     // ADVANCE THE CLOCK SO that all 10 repeats to be executed (last execution)
     moveByMinutes(60 * 24);
     try {
-      waitForJobExecutorToProcessAllJobsAndExecutableTimerJobs(2000, 200);
+      waitForJobExecutorToProcessAllJobsAndExecutableTimerJobs(processEngine, 2000, 200);
     } catch (Exception e) {
       fail("Because the maximum number of repeats is reached it will not be executed other jobs");
     }

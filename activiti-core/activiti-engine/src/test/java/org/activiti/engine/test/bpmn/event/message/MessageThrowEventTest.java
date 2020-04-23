@@ -12,6 +12,7 @@
  */
 package org.activiti.engine.test.bpmn.event.message;
 
+import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.LinkedList;
@@ -112,7 +113,7 @@ public class MessageThrowEventTest extends ResourceActivitiTestCase {
     @Deployment
     public void testIntermediateThrowMessageEvent() throws Exception {
       ProcessInstance pi = runtimeService.startProcessInstanceByKey("testIntermediateThrowMessageEvent");
-      assertProcessEnded(pi.getProcessInstanceId());
+      assertProcessEnded(processEngine, pi.getProcessInstanceId());
       assertThat(listenerExecuted).isTrue();
 
       assertThat(receivedEvents).hasSize(1);
@@ -134,7 +135,7 @@ public class MessageThrowEventTest extends ResourceActivitiTestCase {
     @Deployment
     public void testIntermediateThrowMessageEventJavaDelegate() throws Exception {
       ProcessInstance pi = runtimeService.startProcessInstanceByKey("testIntermediateThrowMessageEventJavaDelegate");
-      assertProcessEnded(pi.getProcessInstanceId());
+      assertProcessEnded(processEngine, pi.getProcessInstanceId());
       assertThat(message.getName()).isEqualTo("bpmnMessage");
       assertThat(delegateExecuted).isTrue();
 
@@ -157,7 +158,7 @@ public class MessageThrowEventTest extends ResourceActivitiTestCase {
     @Deployment
     public void testThrowMessageEndEvent() throws Exception {
       ProcessInstance pi = runtimeService.startProcessInstanceByKey("testThrowMessageEndEvent");
-      assertProcessEnded(pi.getProcessInstanceId());
+      assertProcessEnded(processEngine, pi.getProcessInstanceId());
       assertThat(listenerExecuted).isTrue();
       assertThat(receivedEvents).hasSize(1);
 
@@ -178,7 +179,7 @@ public class MessageThrowEventTest extends ResourceActivitiTestCase {
     @Deployment
     public void testThrowMessageEndEventJavaDelegate() throws Exception {
       ProcessInstance pi = runtimeService.startProcessInstanceByKey("testThrowMessageEndEventJavaDelegate");
-      assertProcessEnded(pi.getProcessInstanceId());
+      assertProcessEnded(processEngine, pi.getProcessInstanceId());
       assertThat(message.getName()).isEqualTo("endMessage");
       assertThat(delegateExecuted).isTrue();
       assertThat(receivedEvents).hasSize(1);
@@ -205,7 +206,7 @@ public class MessageThrowEventTest extends ResourceActivitiTestCase {
                                          .businessKey("foo")
                                          .start();
 
-      assertProcessEnded(pi.getProcessInstanceId());
+      assertProcessEnded(processEngine, pi.getProcessInstanceId());
       assertThat(message.getName()).isEqualTo("bpmnMessage-foo");
       assertThat(delegateExecuted).isTrue();
       assertThat(receivedEvents).hasSize(1);
@@ -232,7 +233,7 @@ public class MessageThrowEventTest extends ResourceActivitiTestCase {
                                          .businessKey("bar")
                                          .start();
 
-      assertProcessEnded(pi.getProcessInstanceId());
+      assertProcessEnded(processEngine, pi.getProcessInstanceId());
       assertThat(message.getName()).isEqualTo("endMessage-bar");
       assertThat(delegateExecuted);
 
@@ -262,7 +263,7 @@ public class MessageThrowEventTest extends ResourceActivitiTestCase {
                                          .businessKey("customerId")
                                          .start();
 
-      assertProcessEnded(pi.getProcessInstanceId());
+      assertProcessEnded(processEngine, pi.getProcessInstanceId());
       assertThat(message.getName()).isEqualTo("bpmnMessage");
       assertThat(delegateExecuted);
 
@@ -294,7 +295,7 @@ public class MessageThrowEventTest extends ResourceActivitiTestCase {
                                          .businessKey("customerId")
                                          .start();
 
-      assertProcessEnded(pi.getProcessInstanceId());
+      assertProcessEnded(processEngine, pi.getProcessInstanceId());
       assertThat(delegateExecuted).as("should execute delegate expression")
                                   .isTrue();
 
@@ -310,7 +311,7 @@ public class MessageThrowEventTest extends ResourceActivitiTestCase {
       ProcessInstance pi = runtimeService.startProcessInstanceByKey("process");
 
       // then
-      assertProcessEnded(pi.getProcessInstanceId());
+      assertProcessEnded(processEngine, pi.getProcessInstanceId());
 
       assertThat(delegateExecuted).as("should execute delegate expression")
                                   .isTrue();
@@ -327,7 +328,7 @@ public class MessageThrowEventTest extends ResourceActivitiTestCase {
                                          .processDefinitionKey("process")
                                          .start();
 
-      assertProcessEnded(pi.getProcessInstanceId());
+      assertProcessEnded(processEngine, pi.getProcessInstanceId());
       assertThat(listenerExecuted).isTrue();
 
       assertThat(message.getCorrelationKey().isPresent()).isTrue();
@@ -358,7 +359,7 @@ public class MessageThrowEventTest extends ResourceActivitiTestCase {
                                          .processDefinitionKey("process")
                                          .start();
 
-      assertProcessEnded(pi.getProcessInstanceId());
+      assertProcessEnded(processEngine, pi.getProcessInstanceId());
       assertThat(listenerExecuted).isTrue();
 
       assertThat(message.getCorrelationKey().isPresent()).isTrue();

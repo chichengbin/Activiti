@@ -17,6 +17,9 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
+import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
+import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
+import static org.activiti.engine.impl.test.TestHelper.assertProcessEndedHistoryData;
 import static org.activiti.engine.impl.util.CollectionUtil.map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -357,7 +360,8 @@ public class RuntimeServiceTest extends PluggableActivitiTestCase {
         assertThat(activeActivities.get(0)).isEqualTo("MainUserTask");
 
         taskService.complete(tasks.get(0).getId());
-        assertProcessEnded(processInstance.getId());
+        String processInstanceId = processInstance.getId();
+        assertProcessEnded(processEngine, processInstanceId);
     }
 
     public void testSignalUnexistingExecututionId() {

@@ -13,6 +13,7 @@
 package org.activiti.engine.test.api.runtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.util.List;
 
@@ -45,11 +46,9 @@ public class ProcessInstanceCommentTest extends PluggableActivitiTestCase {
 
       // Suspend process instance
       runtimeService.suspendProcessInstanceById(processInstance.getId());
-      try {
-        taskService.addComment(null, processInstance.getId(), "Hello World 2");
-      } catch (ActivitiException e) {
-        assertThat(e.getMessage()).contains("Cannot add a comment to a suspended execution");
-      }
+      assertThatExceptionOfType(ActivitiException.class)
+          .isThrownBy(() -> taskService.addComment(null, processInstance.getId(), "Hello World 2"))
+          .withMessageContaining("Cannot add a comment to a suspended execution");
 
       // Delete comments again
       taskService.deleteComments(null, processInstance.getId());

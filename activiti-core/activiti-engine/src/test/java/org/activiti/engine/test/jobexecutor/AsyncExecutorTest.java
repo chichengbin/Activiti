@@ -12,6 +12,8 @@
  */
 package org.activiti.engine.test.jobexecutor;
 
+import static org.activiti.engine.impl.test.JobTestHelper.waitForJobExecutorOnCondition;
+import static org.activiti.engine.impl.test.JobTestHelper.waitForJobExecutorToProcessAllJobsAndExecutableTimerJobs;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -230,15 +232,12 @@ public class AsyncExecutorTest {
       processEngine.getRuntimeService().startProcessInstanceByKey("asyncScript");
 
       final ProcessEngine processEngineCopy = processEngine;
-      JobTestHelper.waitForJobExecutorOnCondition(processEngine.getProcessEngineConfiguration(), 10000L, 1000L, new Callable<Boolean>() {
-        @Override
-        public Boolean call() throws Exception {
-          long timerJobCount = processEngineCopy.getManagementService().createTimerJobQuery().count();
-          if (timerJobCount == 0) {
-            return processEngineCopy.getManagementService().createJobQuery().count() == 0;
-          } else {
-            return false;
-          }
+      waitForJobExecutorOnCondition(processEngine, 10000L, 1000L, () -> {
+        long timerJobCount = processEngineCopy.getManagementService().createTimerJobQuery().count();
+        if (timerJobCount == 0) {
+          return processEngineCopy.getManagementService().createJobQuery().count() == 0;
+        } else {
+          return false;
         }
       });
 
@@ -314,7 +313,7 @@ public class AsyncExecutorTest {
   }
 
   private void waitForAllJobsBeingExecuted(ProcessEngine processEngine, long maxWaitTime) {
-    JobTestHelper.waitForJobExecutorToProcessAllJobsAndExecutableTimerJobs(processEngine.getProcessEngineConfiguration(), processEngine.getManagementService(), maxWaitTime, 1000L, false);
+    waitForJobExecutorToProcessAllJobsAndExecutableTimerJobs(processEngine, maxWaitTime, 1000L, false);
   }
 
   private int getAsyncExecutorJobCount(ProcessEngine processEngine) {

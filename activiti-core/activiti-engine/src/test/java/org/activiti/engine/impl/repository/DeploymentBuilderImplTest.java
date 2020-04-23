@@ -57,8 +57,7 @@ public class DeploymentBuilderImplTest {
         doReturn(deploymentBuilder).when(deploymentBuilder).addZipInputStream(any());
 
         //when
-        deploymentBuilder.addInputStream("my.bar",
-                                         resource);
+        deploymentBuilder.addInputStream("my.bar", resource);
 
         //then
         verify(deploymentBuilder).addZipInputStream(any());

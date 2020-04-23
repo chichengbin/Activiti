@@ -15,6 +15,10 @@ package org.activiti.engine.test.bpmn.event.signal;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonMap;
+import static org.activiti.engine.impl.test.JobTestHelper.waitForJobExecutorToProcessAllJobs;
+import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
+import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
+import static org.activiti.engine.impl.test.TestHelper.assertProcessEndedHistoryData;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -114,7 +118,7 @@ public class SignalEventTest extends PluggableActivitiTestCase {
 
     try {
       processEngineConfiguration.getClock().setCurrentTime(new Date(System.currentTimeMillis() + 1000));
-      waitForJobExecutorToProcessAllJobs(10000, 100l);
+      waitForJobExecutorToProcessAllJobs(processEngine, 10000, 100l);
 
       assertThat(createEventSubscriptionQuery().count()).isEqualTo(0);
       assertThat(runtimeService.createProcessInstanceQuery().count()).isEqualTo(0);
@@ -156,7 +160,8 @@ public class SignalEventTest extends PluggableActivitiTestCase {
   public void testSignalBoundaryOnSubProcess() {
     ProcessInstance pi = runtimeService.startProcessInstanceByKey("signalEventOnSubprocess");
     runtimeService.signalEventReceived("stopSignal");
-    assertProcessEnded(pi.getProcessInstanceId());
+    String processInstanceId = pi.getProcessInstanceId();
+    assertProcessEnded(processEngine, processInstanceId);
   }
 
   public void testDuplicateSignalNames() {
@@ -331,7 +336,7 @@ public class SignalEventTest extends PluggableActivitiTestCase {
 
     assertThat(managementService.createJobQuery().messages().count()).isEqualTo(1);
 
-    waitForJobExecutorToProcessAllJobs(8000L, 200L);
+    waitForJobExecutorToProcessAllJobs(processEngine, 8000L, 200L);
     assertThat(createEventSubscriptionQuery().count()).isEqualTo(0);
     assertThat(runtimeService.createProcessInstanceQuery().count()).isEqualTo(0);
     assertThat(managementService.createJobQuery().count()).isEqualTo(0);

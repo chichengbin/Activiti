@@ -13,6 +13,7 @@
 
 package org.activiti.engine.test.bpmn.servicetask;
 
+import static org.activiti.engine.impl.test.JobTestHelper.waitForJobExecutorToProcessAllJobs;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.Serializable;
@@ -99,7 +100,7 @@ public class ServiceTaskVariablesTest extends PluggableActivitiTestCase {
     // in this test, only the third service task is async
 
     runtimeService.startProcessInstanceByKey("process");
-    waitForJobExecutorToProcessAllJobs(10000, 500);
+    waitForJobExecutorToProcessAllJobs(processEngine, 10000, 500);
 
     synchronized (ServiceTaskVariablesTest.class) {
       assertThat(isOkInDelegate2).isTrue();

@@ -25,22 +25,22 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Parent class for internal Activiti tests.
- * 
+ *
  * Boots up a process engine and caches it.
- * 
+ *
  * When using H2 and the default schema name, it will also boot the H2 webapp (reachable with browser on http://localhost:8082/)
- * 
+ *
  */
-public class AbstractActviti6Test {
-  
-  private static final Logger logger = LoggerFactory.getLogger(AbstractActviti6Test.class);
+public class AbstractActiviti6Test {
+
+  private static final Logger logger = LoggerFactory.getLogger(AbstractActiviti6Test.class);
 
   public static String H2_TEST_JDBC_URL = "jdbc:h2:mem:activiti;DB_CLOSE_DELAY=1000";
 
   @Rule
   public ActivitiRule activitiRule = new ActivitiRule();
 
-  protected static ProcessEngine cachedProcessEngine;
+  protected ProcessEngine processEngine;
   protected ProcessEngineConfigurationImpl processEngineConfiguration;
   protected RepositoryService repositoryService;
   protected RuntimeService runtimeService;
@@ -50,23 +50,21 @@ public class AbstractActviti6Test {
 
   @Before
   public void initProcessEngine() {
-    if (cachedProcessEngine == null) {
-      cachedProcessEngine = activitiRule.getProcessEngine();
+    this.processEngine = activitiRule.getProcessEngine();
 
-      // Boot up H2 webapp
-      if (cachedProcessEngine instanceof ProcessEngineImpl) {
-        if (((ProcessEngineImpl) cachedProcessEngine).getProcessEngineConfiguration().getJdbcUrl().equals(H2_TEST_JDBC_URL)) {
-          initializeH2WebApp(cachedProcessEngine);
-        }
+    // Boot up H2 webapp
+    if (processEngine instanceof ProcessEngineImpl) {
+      if (((ProcessEngineImpl) processEngine).getProcessEngineConfiguration().getJdbcUrl().equals(H2_TEST_JDBC_URL)) {
+        initializeH2WebApp(processEngine);
       }
     }
 
-    this.processEngineConfiguration = (ProcessEngineConfigurationImpl) cachedProcessEngine.getProcessEngineConfiguration();
-    this.repositoryService = cachedProcessEngine.getRepositoryService();
-    this.runtimeService = cachedProcessEngine.getRuntimeService();
-    this.taskService = cachedProcessEngine.getTaskService();
-    this.historyService = cachedProcessEngine.getHistoryService();
-    this.managementService = cachedProcessEngine.getManagementService();
+    this.processEngineConfiguration = (ProcessEngineConfigurationImpl) processEngine.getProcessEngineConfiguration();
+    this.repositoryService = processEngine.getRepositoryService();
+    this.runtimeService = processEngine.getRuntimeService();
+    this.taskService = processEngine.getTaskService();
+    this.historyService = processEngine.getHistoryService();
+    this.managementService = processEngine.getManagementService();
   }
 
   @After
@@ -78,7 +76,7 @@ public class AbstractActviti6Test {
   public void logCommandInvokerDebugInfo() {
 
     ProcessExecutionLoggerConfigurator loggerConfigurator = null;
-    List<ProcessEngineConfigurator> configurators = ((ProcessEngineImpl) cachedProcessEngine).getProcessEngineConfiguration().getConfigurators();
+    List<ProcessEngineConfigurator> configurators = ((ProcessEngineImpl) processEngine).getProcessEngineConfiguration().getConfigurators();
     if (configurators != null && configurators.size() > 0) {
       for (ProcessEngineConfigurator configurator : configurators) {
         if (configurator instanceof ProcessExecutionLoggerConfigurator) {

@@ -13,6 +13,9 @@
 
 package org.activiti.examples.bpmn.receivetask;
 
+import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
+import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
+import static org.activiti.engine.impl.test.TestHelper.assertProcessEndedHistoryData;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.activiti.engine.impl.test.PluggableActivitiTestCase;
@@ -21,17 +24,18 @@ import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.test.Deployment;
 
 /**
+ *
  */
 public class ReceiveTaskTest extends PluggableActivitiTestCase {
 
-  @Deployment
-  public void testWaitStateBehavior() {
-    ProcessInstance pi = runtimeService.startProcessInstanceByKey("receiveTask");
-    Execution execution = runtimeService.createExecutionQuery().processInstanceId(pi.getId()).activityId("waitState").singleResult();
-    assertThat(execution).isNotNull();
+    @Deployment
+    public void testWaitStateBehavior() {
+        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("receiveTask");
+        Execution execution = runtimeService.createExecutionQuery().processInstanceId(processInstance.getId()).activityId("waitState").singleResult();
+        assertThat(execution).isNotNull();
 
-    runtimeService.trigger(execution.getId());
-    assertProcessEnded(pi.getId());
-  }
+        runtimeService.trigger(execution.getId());
+        assertProcessEnded(processEngine, processInstance.getId());
+    }
 
 }

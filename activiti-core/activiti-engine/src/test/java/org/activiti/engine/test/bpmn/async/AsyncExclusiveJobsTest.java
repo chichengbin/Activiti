@@ -12,6 +12,7 @@
  */
 package org.activiti.engine.test.bpmn.async;
 
+import static org.activiti.engine.impl.test.JobTestHelper.waitForJobExecutorToProcessAllJobs;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.activiti.engine.history.HistoricActivityInstance;
@@ -32,7 +33,7 @@ public class AsyncExclusiveJobsTest extends PluggableActivitiTestCase {
 			// The process has two script tasks in parallel, both exclusive.
 			// They should be executed with at least 6 seconds in between (as they both sleep for 6 seconds)
 			runtimeService.startProcessInstanceByKey("testExclusiveJobs");
-			waitForJobExecutorToProcessAllJobs(20000L, 500L);
+			waitForJobExecutorToProcessAllJobs(processEngine, 20000L, 500L);
 
 			HistoricActivityInstance scriptTaskAInstance = historyService.createHistoricActivityInstanceQuery().activityId("scriptTaskA").singleResult();
 			HistoricActivityInstance scriptTaskBInstance = historyService.createHistoricActivityInstanceQuery().activityId("scriptTaskB").singleResult();

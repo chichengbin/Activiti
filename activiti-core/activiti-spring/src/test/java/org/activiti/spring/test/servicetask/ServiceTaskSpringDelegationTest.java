@@ -12,9 +12,10 @@
  */
 package org.activiti.spring.test.servicetask;
 
+import static org.activiti.engine.impl.test.JobTestHelper.areJobsAvailable;
+import static org.activiti.engine.impl.test.JobTestHelper.waitForJobExecutorToProcessAllJobs;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.activiti.engine.impl.test.JobTestHelper;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.test.Deployment;
 import org.activiti.spring.impl.test.SpringActivitiTestCase;
@@ -38,8 +39,8 @@ public class ServiceTaskSpringDelegationTest extends SpringActivitiTestCase {
     @Deployment
     public void testAsyncDelegateExpression() throws Exception {
         ProcessInstance procInst = runtimeService.startProcessInstanceByKey("delegateExpressionToSpringBean");
-        assertThat(JobTestHelper.areJobsAvailable(managementService)).isTrue();
-        waitForJobExecutorToProcessAllJobs(5000, 500);
+        assertThat(areJobsAvailable(processEngine)).isTrue();
+        waitForJobExecutorToProcessAllJobs(processEngine, 5000, 500);
         Thread.sleep(1000);
         assertThat(runtimeService.getVariable(procInst.getId(), "myVar")).isEqualTo("Activiti BPMN 2.0 process engine");
         assertThat(runtimeService.getVariable(procInst.getId(), "fieldInjection")).isEqualTo("fieldInjectionWorking");
@@ -56,8 +57,8 @@ public class ServiceTaskSpringDelegationTest extends SpringActivitiTestCase {
     @Deployment
     public void testAsyncMethodExpressionOnSpringBean() {
         ProcessInstance procInst = runtimeService.startProcessInstanceByKey("methodExpressionOnSpringBean");
-        assertThat(JobTestHelper.areJobsAvailable(managementService)).isTrue();
-        waitForJobExecutorToProcessAllJobs(5000, 500);
+        assertThat(areJobsAvailable(processEngine)).isTrue();
+        waitForJobExecutorToProcessAllJobs(processEngine, 5000, 500);
         assertThat(runtimeService.getVariable(procInst.getId(), "myVar")).isEqualTo("ACTIVITI BPMN 2.0 PROCESS ENGINE");
     }
 

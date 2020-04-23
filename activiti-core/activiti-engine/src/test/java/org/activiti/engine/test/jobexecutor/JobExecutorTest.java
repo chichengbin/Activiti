@@ -12,6 +12,7 @@
  */
 package org.activiti.engine.test.jobexecutor;
 
+import static org.activiti.engine.impl.test.JobTestHelper.waitForJobExecutorToProcessAllJobs;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Calendar;
@@ -54,7 +55,7 @@ public class JobExecutorTest extends JobExecutorTestCase {
     currentCal.add(Calendar.MINUTE, 1);
     processEngineConfiguration.getClock().setCurrentTime(currentCal.getTime());
 
-    waitForJobExecutorToProcessAllJobs(8000L, 200L);
+    waitForJobExecutorToProcessAllJobs(processEngine, 8000L, 200L);
 
     Set<String> messages = new HashSet<String>(tweetHandler.getMessages());
     Set<String> expectedMessages = new HashSet<String>();

@@ -16,6 +16,7 @@ package org.activiti.standalone.testing;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.activiti.engine.ManagementService;
+import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.impl.test.JobTestHelper;
@@ -55,8 +56,9 @@ public class ActivitiRuleJunit4Test {
   @Test
   @Deployment(resources = { "org/activiti/engine/test/bpmn/async/AsyncTaskTest.testAsyncTask.bpmn20.xml" })
   public void testWaitForJobs() {
-    RuntimeService runtimeService = activitiRule.getRuntimeService();
-    ManagementService managementService = activitiRule.getManagementService();
+    ProcessEngine processEngine = activitiRule.getProcessEngine();
+    RuntimeService runtimeService = processEngine.getRuntimeService();
+    ManagementService managementService = processEngine.getManagementService();
 
     // start process
     runtimeService.startProcessInstanceByKey("asyncTask");
@@ -64,7 +66,7 @@ public class ActivitiRuleJunit4Test {
     // now there should be one job in the database:
     assertThat(managementService.createJobQuery().count()).isEqualTo(1);
 
-    JobTestHelper.waitForJobExecutorToProcessAllJobs(activitiRule, 5000L, 500L);
+    JobTestHelper.waitForJobExecutorToProcessAllJobs(processEngine, 5000L, 500L);
 
     // the job is done
     assertThat(managementService.createJobQuery().count()).isEqualTo(0);

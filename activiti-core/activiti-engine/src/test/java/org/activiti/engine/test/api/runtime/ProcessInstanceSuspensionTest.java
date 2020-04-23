@@ -13,6 +13,7 @@
 package org.activiti.engine.test.api.runtime;
 
 import static java.util.Arrays.asList;
+import static org.activiti.engine.impl.test.JobTestHelper.waitForJobExecutorToProcessAllJobs;
 import static org.activiti.engine.impl.util.CollectionUtil.map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -444,7 +445,7 @@ public class ProcessInstanceSuspensionTest extends PluggableActivitiTestCase {
 
     // Activation of the process instance should now allow for job execution
     runtimeService.activateProcessInstanceById(processInstance.getId());
-    waitForJobExecutorToProcessAllJobs(10000L, 100L);
+    waitForJobExecutorToProcessAllJobs(processEngine, 10000L, 100L);
     assertThat(managementService.createJobQuery().count()).isEqualTo(0);
     assertThat(managementService.createTimerJobQuery().count()).isEqualTo(0);
     assertThat(managementService.createSuspendedJobQuery().count()).isEqualTo(0);

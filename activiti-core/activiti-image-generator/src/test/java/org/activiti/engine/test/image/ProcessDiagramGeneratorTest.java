@@ -27,21 +27,6 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class ProcessDiagramGeneratorTest extends PluggableActivitiTestCase {
 
-    @Override
-    protected void initializeProcessEngine() {
-        ProcessEngines.destroy();
-        processEngine = ProcessEngineConfiguration.createStandaloneProcessEngineConfiguration()
-                                                  .setDatabaseSchemaUpdate("drop-create")
-                .setJdbcDriver("org.h2.Driver")
-                .setJdbcUrl("jdbc:h2:mem:activiti;DB_CLOSE_DELAY=1000")
-                .setJdbcPassword("")
-                .setJdbcUsername("sa")
-                .buildProcessEngine();
-
-        cachedProcessEngine = processEngine;
-        processEngineConfiguration = ((ProcessEngineImpl) processEngine).getProcessEngineConfiguration();
-    }
-
     @Deployment
     public void testHighLighted() throws Exception {
         ProcessDiagramGenerator imageGenerator = new DefaultProcessDiagramGenerator();

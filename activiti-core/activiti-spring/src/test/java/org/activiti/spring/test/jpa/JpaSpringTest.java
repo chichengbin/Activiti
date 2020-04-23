@@ -39,7 +39,7 @@ public class JpaSpringTest extends SpringActivitiTestCase {
         assertThat(task).isNotNull();
         taskService.complete(task.getId(), singletonMap("approvedByManager", Boolean.TRUE));
 
-        // If approved, the processsInstance should be finished, gateway based on loanRequest.approved value
+        // If approved, the processInstance should be finished, gateway based on loanRequest.approved value
         assertThat(runtimeService.createProcessInstanceQuery().processInstanceId(processInstance.getId()).count()).isEqualTo(0);
     }
 

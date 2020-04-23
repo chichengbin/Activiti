@@ -224,12 +224,12 @@ public class JsonTest extends PluggableActivitiTestCase {
   protected ObjectNode createBigJsonObject() {
     ObjectNode valueNode = objectMapper.createObjectNode();
     for (int i = 0; i < 1000; i++) {
-      ObjectNode childNode = objectMapper.createObjectNode();
-      childNode.put("test", "this is a simple test text");
-      childNode.put("test2", "this is a simple test2 text");
-      childNode.put("test3", "this is a simple test3 text");
-      childNode.put("test4", "this is a simple test4 text");
-      valueNode.put("var" + i, childNode);
+      valueNode.set("var" + i, objectMapper.createObjectNode()
+          .put("test", "this is a simple test text")
+          .put("test2", "this is a simple test2 text")
+          .put("test3", "this is a simple test3 text")
+          .put("test4", "this is a simple test4 text")
+      );
     }
     return valueNode;
   }

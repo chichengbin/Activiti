@@ -15,6 +15,9 @@ package org.activiti.standalone.history;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonMap;
+import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
+import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
+import static org.activiti.engine.impl.test.TestHelper.assertProcessEndedHistoryData;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -157,7 +160,8 @@ public class FullHistoryTest extends ResourceActivitiTestCase {
 
         // trigger receive task
         runtimeService.trigger(runtimeService.createExecutionQuery().activityId("waitState").singleResult().getId());
-        assertProcessEnded(processInstance.getId());
+        String processInstanceId = processInstance.getId();
+        assertProcessEnded(processEngine, processInstanceId);
 
         // check for historic process variables set
         HistoricVariableInstanceQuery historicProcessVariableQuery = historyService.createHistoricVariableInstanceQuery().orderByVariableName().asc();
@@ -394,7 +398,8 @@ public class FullHistoryTest extends ResourceActivitiTestCase {
         List<Task> tasks = taskService.createTaskQuery().list();
         assertThat(tasks).hasSize(1);
         taskService.complete(tasks.get(0).getId());
-        assertProcessEnded(processInstance.getId());
+        String processInstanceId = processInstance.getId();
+        assertProcessEnded(processEngine, processInstanceId);
 
         // check for historic process variables set
         HistoricVariableInstanceQuery historicProcessVariableQuery = historyService.createHistoricVariableInstanceQuery().orderByVariableName().asc();
@@ -472,7 +477,8 @@ public class FullHistoryTest extends ResourceActivitiTestCase {
         List<Task> tasks = taskService.createTaskQuery().list();
         assertThat(tasks.size()).isEqualTo(1);
         taskService.complete(tasks.get(0).getId());
-        assertProcessEnded(processInstance.getId());
+        String processInstanceId = processInstance.getId();
+        assertProcessEnded(processEngine, processInstanceId);
 
         assertThat(historyService.createHistoricVariableInstanceQuery().count()).isEqualTo(2);
 
@@ -1154,7 +1160,8 @@ public class FullHistoryTest extends ResourceActivitiTestCase {
                              variables);
 
         // now we are ended
-        assertProcessEnded(pi.getId());
+        String processInstanceId = pi.getId();
+        assertProcessEnded(processEngine, processInstanceId);
 
         // check history
         List<HistoricDetail> updates = historyService.createHistoricDetailQuery().variableUpdates().list();
@@ -1162,11 +1169,9 @@ public class FullHistoryTest extends ResourceActivitiTestCase {
 
         Map<String, HistoricVariableUpdate> updatesMap = new HashMap<String, HistoricVariableUpdate>();
         HistoricVariableUpdate update = (HistoricVariableUpdate) updates.get(0);
-        updatesMap.put((String) update.getValue(),
-                       update);
+        updatesMap.put((String) update.getValue(), update);
         update = (HistoricVariableUpdate) updates.get(1);
-        updatesMap.put((String) update.getValue(),
-                       update);
+        updatesMap.put((String) update.getValue(), update);
 
         HistoricVariableUpdate update1 = updatesMap.get("1");
         HistoricVariableUpdate update2 = updatesMap.get("2");

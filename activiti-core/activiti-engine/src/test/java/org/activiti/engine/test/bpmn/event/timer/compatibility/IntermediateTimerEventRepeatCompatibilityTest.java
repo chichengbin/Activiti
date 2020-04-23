@@ -13,6 +13,7 @@
 
 package org.activiti.engine.test.bpmn.event.timer.compatibility;
 
+import static org.activiti.engine.impl.test.JobTestHelper.waitForJobExecutorToProcessAllJobs;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Calendar;
@@ -77,14 +78,14 @@ public class IntermediateTimerEventRepeatCompatibilityTest extends TimerEventCom
     // not reached but it will be executed according to the expression)
     taskService.complete(task.getId());
 
-    waitForJobExecutorToProcessAllJobs(2000, 500);
+    waitForJobExecutorToProcessAllJobs(processEngine, 2000, 500);
     // Expected that job isn't executed because the timer is in t0
     assertThat(managementService.createTimerJobQuery().processInstanceId(processInstance.getId()).singleResult()).isNotNull();
 
     nextTimeCal.add(Calendar.HOUR, 1); // after 1 hour the event must be triggered and the flow will go to the next step
     processEngineConfiguration.getClock().setCurrentTime(nextTimeCal.getTime());
 
-    waitForJobExecutorToProcessAllJobs(2000, 500);
+    waitForJobExecutorToProcessAllJobs(processEngine, 2000, 500);
     // expect to execute because the time is reached.
 
     List<Job> jobs = managementService.createJobQuery().list();
@@ -100,7 +101,7 @@ public class IntermediateTimerEventRepeatCompatibilityTest extends TimerEventCom
     nextTimeCal.add(Calendar.HOUR, 1); // after 1H 40 minutes from process start, the timer will trigger because of the endDate
     processEngineConfiguration.getClock().setCurrentTime(nextTimeCal.getTime());
 
-    waitForJobExecutorToProcessAllJobs(2000, 500);
+    waitForJobExecutorToProcessAllJobs(processEngine, 2000, 500);
     // expect to execute because the end time is reached.
 
     if (processEngineConfiguration.getHistoryLevel().isAtLeast(HistoryLevel.ACTIVITY)) {

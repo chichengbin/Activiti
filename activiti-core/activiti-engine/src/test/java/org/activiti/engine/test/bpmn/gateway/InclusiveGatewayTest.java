@@ -13,6 +13,8 @@
 package org.activiti.engine.test.bpmn.gateway;
 
 import static java.util.Collections.singletonMap;
+import static org.activiti.engine.impl.test.JobTestHelper.waitForJobExecutorToProcessAllJobs;
+import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -310,7 +312,7 @@ public class InclusiveGatewayTest extends PluggableActivitiTestCase {
     assertThat(taskService.createTaskQuery().count()).isEqualTo(0);
 
     assertThat(runtimeService.createExecutionQuery().count()).as("Found executions: " + runtimeService.createExecutionQuery().list()).isEqualTo(0);
-    assertProcessEnded(pi.getId());
+    assertProcessEnded(processEngine, pi.getId());
   }
 
   @Deployment
@@ -406,7 +408,7 @@ public class InclusiveGatewayTest extends PluggableActivitiTestCase {
   @Deployment
   public void testAsyncBehavior() {
     ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("async");
-    waitForJobExecutorToProcessAllJobs(5000L, 250);
+    waitForJobExecutorToProcessAllJobs(processEngine, 5000L, 250);
     assertThat(runtimeService.createProcessInstanceQuery().processInstanceId(processInstance.getId()).count()).isEqualTo(0);
   }
 

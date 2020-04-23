@@ -12,6 +12,7 @@
  */
 package org.activiti.engine.test.bpmn;
 
+import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.Serializable;
@@ -33,7 +34,7 @@ public class StartToEndTest extends PluggableActivitiTestCase {
   @Deployment
   public void testStartToEnd() {
     ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("startToEnd");
-    assertProcessEnded(processInstance.getId());
+    assertProcessEnded(processEngine, processInstance.getId());
     assertThat(processInstance.isEnded()).isTrue();
   }
 
@@ -42,7 +43,7 @@ public class StartToEndTest extends PluggableActivitiTestCase {
     Map<String, Object> varMap = new HashMap<String, Object>();
     varMap.put("test", "hello");
     ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("startToEnd", varMap);
-    assertProcessEnded(processInstance.getId());
+    assertProcessEnded(processEngine, processInstance.getId());
     Map<String, Object> returnVarMap = ((ExecutionEntity) processInstance).getVariables();
     assertThat(returnVarMap.get("test")).isEqualTo("hello");
   }
@@ -52,7 +53,7 @@ public class StartToEndTest extends PluggableActivitiTestCase {
     Map<String, Object> varMap = new HashMap<String, Object>();
     varMap.put("test", "hello");
     ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("startToEnd", varMap);
-    assertProcessEnded(processInstance.getId());
+    assertProcessEnded(processEngine, processInstance.getId());
     Map<String, Object> returnVarMap = ((ExecutionEntity) processInstance).getVariables();
     assertThat(returnVarMap.get("test")).isEqualTo("hello");
     assertThat(returnVarMap.get("string")).isEqualTo("string");
@@ -66,7 +67,7 @@ public class StartToEndTest extends PluggableActivitiTestCase {
     Map<String, Object> varMap = new HashMap<String, Object>();
     varMap.put("test", "hello");
     ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("startToEnd", varMap);
-    assertProcessEnded(processInstance.getId());
+    assertProcessEnded(processEngine, processInstance.getId());
     Map<String, Object> returnVarMap = ((ExecutionEntity) processInstance).getVariables();
     assertThat(returnVarMap.get("test")).isEqualTo("hello");
     Person person1 = (Person) returnVarMap.get("person1");

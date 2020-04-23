@@ -12,6 +12,7 @@
  */
 package org.activiti.engine.test.bpmn.event.message;
 
+import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.assertj.core.api.Assertions.entry;
@@ -19,6 +20,8 @@ import static org.assertj.core.api.Assertions.tuple;
 
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.ActivitiIllegalArgumentException;
+import org.activiti.engine.HistoryService;
+import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.delegate.event.ActivitiEvent;
@@ -27,6 +30,7 @@ import org.activiti.engine.delegate.event.ActivitiEventType;
 import org.activiti.engine.delegate.event.ActivitiMessageEvent;
 import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.impl.EventSubscriptionQueryImpl;
+import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.activiti.engine.impl.cfg.StandaloneProcessEngineConfiguration;
 import org.activiti.engine.impl.cfg.TransactionListener;
 import org.activiti.engine.impl.cfg.TransactionState;
@@ -38,9 +42,11 @@ import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.persistence.entity.EventSubscriptionEntity;
 import org.activiti.engine.impl.test.ResourceActivitiTestCase;
 import org.activiti.engine.runtime.ProcessInstance;
+import org.activiti.engine.test.ActivitiRule;
 import org.activiti.engine.test.Deployment;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.LinkedList;
@@ -58,7 +64,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MessageThrowCatchEventTest extends ResourceActivitiTestCase {
+public class MessageThrowCatchEventTest {
 
     private static final Logger logger = LoggerFactory.getLogger(MessageThrowCatchEventTest.class);
     private static final String THROW_MESSAGE2 = "throwMessage";
@@ -72,12 +78,6 @@ public class MessageThrowCatchEventTest extends ResourceActivitiTestCase {
     private static Map<SubscriptionKey, Optional<String>> messageExecutionRegistry = new ConcurrentHashMap<>();
     private static CountDownLatch startCountDownLatch;
     private static AtomicReference<CountDownLatch> waitingCountDownLatchRef = new AtomicReference<>();
-
-    private ActivitiEventListener catchMessageListener = new CatchMessageListener(waitingCountDownLatchRef);
-
-    public MessageThrowCatchEventTest() {
-        super("/org/activiti/engine/test/bpmn/event/message/MessageThrowCatchEventTest.activiti.cfg.xml");
-    }
 
     public static class TestThrowMessageDelegateFactory implements ThrowMessageDelegateFactory {
 
@@ -194,6 +194,8 @@ public class MessageThrowCatchEventTest extends ResourceActivitiTestCase {
          }
     }
 
+    private ActivitiEventListener catchMessageListener = new CatchMessageListener(waitingCountDownLatchRef);
+
     private ActivitiEventListener spyMessageListener = new ActivitiEventListener() {
 
         @Override
@@ -207,10 +209,18 @@ public class MessageThrowCatchEventTest extends ResourceActivitiTestCase {
         }
     };
 
+    @Rule
+    public ActivitiRule activitiRule = new ActivitiRule("/org/activiti/engine/test/bpmn/event/message/MessageThrowCatchEventTest.activiti.cfg.xml");
+
+    private ProcessEngine processEngine;
+    private RuntimeService runtimeService;
+    private HistoryService historyService;
+
     @Before
     public void setUp() throws Exception {
-        super.setUp();
-
+        processEngine = activitiRule.getProcessEngine();
+        runtimeService = processEngine.getRuntimeService();
+        historyService = processEngine.getHistoryService();
         receivedEvents.clear();
         messageQueueRegistry.clear();
         messageExecutionRegistry.clear();
@@ -264,8 +274,8 @@ public class MessageThrowCatchEventTest extends ResourceActivitiTestCase {
         // then
         assertThat(countDownLatch.await(1, TimeUnit.SECONDS)).isTrue();
 
-        assertProcessEnded(throwMsg.getProcessInstanceId());
-        assertProcessEnded(catchMsg.getProcessInstanceId());
+        assertProcessEnded(processEngine, throwMsg.getProcessInstanceId());
+        assertProcessEnded(processEngine, catchMsg.getProcessInstanceId());
 
         HistoricProcessInstance startMsg = historyService.createHistoricProcessInstanceQuery()
                                                          .processDefinitionKey(CATCH_MESSAGE)
@@ -314,8 +324,8 @@ public class MessageThrowCatchEventTest extends ResourceActivitiTestCase {
         assertThat(startMsg.getBusinessKey()).isEqualTo("foobar");
         assertThat(startMsg.getProcessVariables()).containsEntry("foo", "bar");
 
-        assertProcessEnded(throwMsg.getId());
-        assertProcessEnded(startMsg.getId());
+        assertProcessEnded(processEngine, throwMsg.getId());
+        assertProcessEnded(processEngine, startMsg.getId());
 
         assertThat(receivedEvents).hasSize(2)
                                   .extracting("type",
@@ -352,8 +362,8 @@ public class MessageThrowCatchEventTest extends ResourceActivitiTestCase {
         assertThat(startMsg.getBusinessKey()).isEqualTo("foobar");
         assertThat(startMsg.getProcessVariables()).containsEntry("foo", "bar");
 
-        assertProcessEnded(throwMsg.getId());
-        assertProcessEnded(startMsg.getId());
+        assertProcessEnded(processEngine, throwMsg.getId());
+        assertProcessEnded(processEngine, startMsg.getId());
 
         assertThat(receivedEvents).hasSize(2)
                                   .extracting("type",
@@ -381,8 +391,8 @@ public class MessageThrowCatchEventTest extends ResourceActivitiTestCase {
         // then
         assertThat(countDownLatch.await(1, TimeUnit.SECONDS)).isTrue();
 
-        assertProcessEnded(throwMessage.getId());
-        assertProcessEnded(catchMessage.getId());
+        assertProcessEnded(processEngine, throwMessage.getId());
+        assertProcessEnded(processEngine, catchMessage.getId());
 
         assertThat(receivedEvents).hasSize(3)
                                   .extracting("type",
@@ -413,8 +423,8 @@ public class MessageThrowCatchEventTest extends ResourceActivitiTestCase {
         // then
         assertThat(countDownLatch.await(1, TimeUnit.SECONDS)).isTrue();
 
-        assertProcessEnded(throwMessage.getId());
-        assertProcessEnded(catchMessage.getId());
+        assertProcessEnded(processEngine, throwMessage.getId());
+        assertProcessEnded(processEngine, catchMessage.getId());
 
         assertThat(receivedEvents).hasSize(3)
                                   .extracting("type",
@@ -445,7 +455,7 @@ public class MessageThrowCatchEventTest extends ResourceActivitiTestCase {
         // then
         assertThat(countDownLatch.await(1, TimeUnit.SECONDS)).isFalse();
 
-        assertProcessEnded(throwMessage.getId());
+        assertProcessEnded(processEngine, throwMessage.getId());
         assertThat(processEngine.getRuntimeService()
                                 .createProcessInstanceQuery()
                                 .processInstanceId(catchMessage.getId())
@@ -475,7 +485,7 @@ public class MessageThrowCatchEventTest extends ResourceActivitiTestCase {
         // then
         assertThat(countDownLatch.await(1, TimeUnit.SECONDS)).isTrue();
 
-        assertProcessEnded(throwMessage.getId());
+        assertProcessEnded(processEngine, throwMessage.getId());
         assertThat(processEngine.getRuntimeService()
                                 .createProcessInstanceQuery()
                                 .processDefinitionKey(CATCH_MESSAGE)
@@ -506,7 +516,7 @@ public class MessageThrowCatchEventTest extends ResourceActivitiTestCase {
         // then
         assertThat(countDownLatch.await(1, TimeUnit.SECONDS)).isTrue();
 
-        assertProcessEnded(throwMessage.getId());
+        assertProcessEnded(processEngine, throwMessage.getId());
         assertThat(processEngine.getRuntimeService()
                                 .createProcessInstanceQuery()
                                 .processDefinitionKey(CATCH_MESSAGE)
@@ -540,8 +550,8 @@ public class MessageThrowCatchEventTest extends ResourceActivitiTestCase {
         // then
         assertThat(countDownLatch.await(1, TimeUnit.SECONDS)).isTrue();
 
-        assertProcessEnded(throwMessage.getId());
-        assertProcessEnded(catchMessage.getId());
+        assertProcessEnded(processEngine, throwMessage.getId());
+        assertProcessEnded(processEngine, catchMessage.getId());
 
         assertThat(receivedEvents).hasSize(3)
                                   .extracting("type",
@@ -573,7 +583,7 @@ public class MessageThrowCatchEventTest extends ResourceActivitiTestCase {
         // then
         assertThat(countDownLatch.await(1, TimeUnit.SECONDS)).isFalse();
 
-        assertProcessEnded(throwMessage.getId());
+        assertProcessEnded(processEngine, throwMessage.getId());
         assertThat(processEngine.getRuntimeService()
                                 .createProcessInstanceQuery()
                                 .processInstanceId(catchMessage.getId())
@@ -608,8 +618,8 @@ public class MessageThrowCatchEventTest extends ResourceActivitiTestCase {
         // then
         assertThat(countDownLatch.await(1, TimeUnit.SECONDS)).isTrue();
 
-        assertProcessEnded(throwMessage.getId());
-        assertProcessEnded(catchMessage.getId());
+        assertProcessEnded(processEngine, throwMessage.getId());
+        assertProcessEnded(processEngine, catchMessage.getId());
 
         assertThat(receivedEvents).hasSize(3)
                                   .extracting("type",
@@ -639,8 +649,8 @@ public class MessageThrowCatchEventTest extends ResourceActivitiTestCase {
         // then
         assertThat(countDownLatch.await(1, TimeUnit.SECONDS)).isTrue();
 
-        assertProcessEnded(throwMessage.getId());
-        assertProcessEnded(catchMessage.getId());
+        assertProcessEnded(processEngine, throwMessage.getId());
+        assertProcessEnded(processEngine, catchMessage.getId());
 
         assertThat(receivedEvents).hasSize(3)
                                   .extracting("type",
@@ -671,8 +681,8 @@ public class MessageThrowCatchEventTest extends ResourceActivitiTestCase {
         // then
         assertThat(countDownLatch.await(1, TimeUnit.SECONDS)).isTrue();
 
-        assertProcessEnded(throwMessage.getId());
-        assertProcessEnded(catchMessage.getId());
+        assertProcessEnded(processEngine, throwMessage.getId());
+        assertProcessEnded(processEngine, catchMessage.getId());
 
         assertThat(receivedEvents).hasSize(3)
                                   .extracting("type",
@@ -701,8 +711,8 @@ public class MessageThrowCatchEventTest extends ResourceActivitiTestCase {
         // then
         assertThat(countDownLatch.await(1, TimeUnit.SECONDS)).isTrue();
 
-        assertProcessEnded(throwMessage.getId());
-        assertProcessEnded(catchMessage.getId());
+        assertProcessEnded(processEngine, throwMessage.getId());
+        assertProcessEnded(processEngine, catchMessage.getId());
 
         assertThat(receivedEvents).hasSize(3)
                                   .extracting("type",
@@ -733,8 +743,8 @@ public class MessageThrowCatchEventTest extends ResourceActivitiTestCase {
         // then
         assertThat(countDownLatch.await(1, TimeUnit.SECONDS)).isTrue();
 
-        assertProcessEnded(throwMessage.getId());
-        assertProcessEnded(catchMessage.getId());
+        assertProcessEnded(processEngine, throwMessage.getId());
+        assertProcessEnded(processEngine, catchMessage.getId());
 
         assertThat(receivedEvents).hasSize(3)
                                   .extracting("type",
@@ -769,8 +779,8 @@ public class MessageThrowCatchEventTest extends ResourceActivitiTestCase {
         // then
         assertThat(countDownLatch.await(1, TimeUnit.SECONDS)).isTrue();
 
-        assertProcessEnded(throwMessage.getId());
-        assertProcessEnded(catchMessage.getId());
+        assertProcessEnded(processEngine, throwMessage.getId());
+        assertProcessEnded(processEngine, catchMessage.getId());
 
         assertThat(receivedEvents).hasSize(3)
                                   .extracting("type",
@@ -802,7 +812,7 @@ public class MessageThrowCatchEventTest extends ResourceActivitiTestCase {
         // then
         assertThat(countDownLatch.await(1, TimeUnit.SECONDS)).isFalse();
 
-        assertProcessEnded(throwMessage.getId());
+        assertProcessEnded(processEngine, throwMessage.getId());
         assertThat(processEngine.getRuntimeService()
                                 .createProcessInstanceQuery()
                                 .processInstanceId(catchMessage.getId())
@@ -845,8 +855,8 @@ public class MessageThrowCatchEventTest extends ResourceActivitiTestCase {
         // then
         assertThat(countDownLatch.await(1, TimeUnit.SECONDS)).isTrue();
 
-        assertProcessEnded(throwMsg.getProcessInstanceId());
-        assertProcessEnded(catchMsg.getProcessInstanceId());
+        assertProcessEnded(processEngine, throwMsg.getProcessInstanceId());
+        assertProcessEnded(processEngine, catchMsg.getProcessInstanceId());
 
         HistoricProcessInstance startMsg = historyService.createHistoricProcessInstanceQuery()
                                                          .processDefinitionKey(CATCH_MESSAGE)
@@ -884,11 +894,9 @@ public class MessageThrowCatchEventTest extends ResourceActivitiTestCase {
                                                                           .configuration("2")
                                                                           .singleResult();
         // then
-        assertThat(subscription).isNotNull();
-        assertThat(subscription).extracting("eventName",
-                                            "configuration")
-                                .containsExactly("newInvoice-1",
-                                                 "2");
+        assertThat(subscription)
+            .isNotNull()
+            .extracting("eventName", "configuration").containsExactly("newInvoice-1", "2");
     }
 
     @Deployment(resources = {
@@ -917,12 +925,11 @@ public class MessageThrowCatchEventTest extends ResourceActivitiTestCase {
     }
 
     protected EventSubscriptionQueryImpl newEventSubscriptionQuery() {
-        return new EventSubscriptionQueryImpl(processEngineConfiguration.getCommandExecutor());
+        return new EventSubscriptionQueryImpl(((ProcessEngineConfigurationImpl) processEngine.getProcessEngineConfiguration()).getCommandExecutor());
     }
 
     protected static BlockingQueue<ThrowMessage> getThrowMessageQueue(SubscriptionKey key) {
-        return messageQueueRegistry.computeIfAbsent(key,
-                                                    MessageThrowCatchEventTest::createMessageQueue);
+        return messageQueueRegistry.computeIfAbsent(key, MessageThrowCatchEventTest::createMessageQueue);
     }
 
     protected static BlockingQueue<ThrowMessage> registerSubscription(SubscriptionKey key, Optional<String> executionId) {
@@ -967,11 +974,9 @@ public class MessageThrowCatchEventTest extends ResourceActivitiTestCase {
 
                                                String messageName = throwMessage.getName();
 
-                                               Map<String, Object> payload = throwMessage.getPayload()
-                                                                                         .orElse(null);
+                                               Map<String, Object> payload = throwMessage.getPayload().orElse(null);
 
-                                               String businessKey = throwMessage.getBusinessKey()
-                                                                                .orElse(null);
+                                               String businessKey = throwMessage.getBusinessKey().orElse(null);
 
                                                runtimeService.startProcessInstanceByMessage(messageName,
                                                                                             businessKey,
@@ -1045,14 +1050,7 @@ public class MessageThrowCatchEventTest extends ResourceActivitiTestCase {
         @Override
         public void onEvent(ActivitiEvent event) {
             Context.getTransactionContext()
-                   .addTransactionListener(TransactionState.COMMITTED,
-                       new TransactionListener() {
-
-                        @Override
-                        public void execute(CommandContext commandContext) {
-                            countDownLatch.countDown();
-                        }
-                    });
+                   .addTransactionListener(TransactionState.COMMITTED, commandContext -> countDownLatch.countDown());
 
         }
 

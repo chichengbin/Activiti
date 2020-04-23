@@ -12,6 +12,8 @@
  */
 package org.activiti.engine.test.jobexecutor;
 
+import static org.activiti.engine.impl.test.JobTestHelper.executeJobExecutorForTime;
+import static org.activiti.engine.impl.test.JobTestHelper.waitForJobExecutorToProcessAllJobs;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.activiti.engine.impl.test.PluggableActivitiTestCase;
@@ -29,7 +31,7 @@ public class JobExecutorFailRetryTest extends PluggableActivitiTestCase {
     RetryFailingDelegate.resetTimeList();
     runtimeService.startProcessInstanceByKey("failedJobRetry");
 
-    waitForJobExecutorToProcessAllJobs(1000, 200);
+    waitForJobExecutorToProcessAllJobs(processEngine, 1000, 200);
     assertThat(RetryFailingDelegate.times).hasSize(1); // check number of calls of delegate
 
     // process throws exception two times, with 6 seconds in between
@@ -37,9 +39,10 @@ public class JobExecutorFailRetryTest extends PluggableActivitiTestCase {
     RetryFailingDelegate.resetTimeList();
     runtimeService.startProcessInstanceByKey("failedJobRetry");
 
-    executeJobExecutorForTime(14000, 500);
+    executeJobExecutorForTime(processEngine, 14000, 500);
     assertThat(RetryFailingDelegate.times).hasSize(2); // check number of calls of delegate
     long timeDiff = RetryFailingDelegate.times.get(1) - RetryFailingDelegate.times.get(0);
     assertThat(timeDiff > 6000 && timeDiff < 12000).isTrue(); // check time difference between calls. Just roughly
   }
+
 }

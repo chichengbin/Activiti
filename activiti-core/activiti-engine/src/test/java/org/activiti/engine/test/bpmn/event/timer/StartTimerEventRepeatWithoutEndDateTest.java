@@ -13,6 +13,8 @@
 
 package org.activiti.engine.test.bpmn.event.timer;
 
+import static org.activiti.engine.impl.test.JobTestHelper.executeJobExecutorForTime;
+import static org.activiti.engine.impl.test.JobTestHelper.waitForJobExecutorToProcessAllJobsAndExecutableTimerJobs;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Calendar;
@@ -95,7 +97,7 @@ public class StartTimerEventRepeatWithoutEndDateTest extends PluggableActivitiTe
     // advance the clock after 9 days from starting the process ->
     // the system will execute the pending job and will create a new one (day by day)
     moveByMinutes((9 * 60 * 24));
-    executeJobExecutorForTime(10000, 200);
+    executeJobExecutorForTime(processEngine, 10000, 200);
 
     // there must be a pending job because the endDate is not reached yet
     assertThat(managementService.createTimerJobQuery().count()).isEqualTo(1);
@@ -122,7 +124,7 @@ public class StartTimerEventRepeatWithoutEndDateTest extends PluggableActivitiTe
     // (last execution)
     moveByMinutes(60 * 24);
     try {
-      waitForJobExecutorToProcessAllJobsAndExecutableTimerJobs(2000, 200);
+      waitForJobExecutorToProcessAllJobsAndExecutableTimerJobs(processEngine, 2000, 200);
     } catch (Exception e) {
       fail("Because the maximum number of repeats is reached no other jobs are created");
     }

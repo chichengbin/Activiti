@@ -13,7 +13,9 @@
 
 package org.activiti.engine.test.bpmn.event.timer;
 
+import static org.activiti.engine.impl.test.JobTestHelper.waitForJobExecutorToProcessAllJobs;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -94,7 +96,7 @@ public class StartTimerEventRepeatWithEndTest extends PluggableActivitiTestCase 
     // ADVANCE THE CLOCK
     // advance the clock to 11 dec -> the system will execute the pending job and will create a new one
     moveByMinutes(60 * 25);
-    waitForJobExecutorToProcessAllJobs(2000, 200);
+    waitForJobExecutorToProcessAllJobs(processEngine, 2000, 200);
 
     // there must be a pending job because the endDate is not reached yet
     jobs = managementService.createTimerJobQuery().list();
@@ -121,7 +123,7 @@ public class StartTimerEventRepeatWithEndTest extends PluggableActivitiTestCase 
     // 12 dec (last execution)
     moveByMinutes(60 * 25);
     try {
-      waitForJobExecutorToProcessAllJobs(10000, 200);
+      waitForJobExecutorToProcessAllJobs(processEngine, 10000, 200);
     } catch (Exception e) {
       fail("Because the endDate is reached no other jobs created");
     }

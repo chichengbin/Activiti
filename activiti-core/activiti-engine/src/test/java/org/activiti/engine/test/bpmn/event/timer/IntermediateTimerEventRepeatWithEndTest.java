@@ -13,6 +13,7 @@
 
 package org.activiti.engine.test.bpmn.event.timer;
 
+import static org.activiti.engine.impl.test.JobTestHelper.waitForJobExecutorToProcessAllJobs;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Calendar;
@@ -83,7 +84,7 @@ public class IntermediateTimerEventRepeatWithEndTest extends PluggableActivitiTe
     Job timerJob = managementService.createTimerJobQuery().processInstanceId(processInstance.getId()).singleResult();
     assertThat(timerJob).isNotNull();
 
-    waitForJobExecutorToProcessAllJobs(2000, 500);
+    waitForJobExecutorToProcessAllJobs(processEngine, 2000, 500);
 
     // Expected that job isn't executed because the timer is in t0");
     Job timerJobAfter = managementService.createTimerJobQuery().processInstanceId(processInstance.getId()).singleResult();
@@ -93,7 +94,7 @@ public class IntermediateTimerEventRepeatWithEndTest extends PluggableActivitiTe
     nextTimeCal.add(Calendar.MINUTE, 5);
     processEngineConfiguration.getClock().setCurrentTime(nextTimeCal.getTime());
 
-    waitForJobExecutorToProcessAllJobs(2000, 200);
+    waitForJobExecutorToProcessAllJobs(processEngine, 2000, 200);
     // expect to execute because the time is reached.
 
     List<Job> jobs = managementService.createTimerJobQuery().list();
@@ -110,7 +111,7 @@ public class IntermediateTimerEventRepeatWithEndTest extends PluggableActivitiTe
     nextTimeCal.add(Calendar.MINUTE, 5);
     processEngineConfiguration.getClock().setCurrentTime(nextTimeCal.getTime());
 
-    waitForJobExecutorToProcessAllJobs(2000, 500);
+    waitForJobExecutorToProcessAllJobs(processEngine, 2000, 500);
     // expect to execute because the end time is reached.
 
     if (processEngineConfiguration.getHistoryLevel().isAtLeast(HistoryLevel.ACTIVITY)) {

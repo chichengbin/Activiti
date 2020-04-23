@@ -14,13 +14,13 @@
 package org.activiti.engine.test.bpmn.callactivity;
 
 import static java.util.Arrays.asList;
+import static org.activiti.engine.impl.test.JobTestHelper.waitForJobExecutorToProcessAllJobs;
+import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.activiti.engine.history.DeleteReason;
@@ -28,6 +28,7 @@ import org.activiti.engine.history.HistoricActivityInstance;
 import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.impl.history.HistoryLevel;
 import org.activiti.engine.impl.test.PluggableActivitiTestCase;
+import org.activiti.engine.impl.test.TestHelper;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.task.TaskQuery;
@@ -60,7 +61,7 @@ public class CallActivityAdvancedTest extends PluggableActivitiTestCase {
 
     // Completing this task end the process instance
     taskService.complete(taskAfterSubProcess.getId());
-    assertProcessEnded(processInstance.getId());
+    assertProcessEnded(processEngine, processInstance.getId());
 
     // Validate subprocess history
     if (processEngineConfiguration.getHistoryLevel().isAtLeast(HistoryLevel.ACTIVITY)) {
@@ -111,7 +112,7 @@ public class CallActivityAdvancedTest extends PluggableActivitiTestCase {
 
     // Completing this task end the process instance
     taskService.complete(taskAfterSubProcess.getId());
-    assertProcessEnded(processInstance.getId());
+    assertProcessEnded(processEngine, processInstance.getId());
   }
 
   /**
@@ -131,7 +132,7 @@ public class CallActivityAdvancedTest extends PluggableActivitiTestCase {
     // Completing this task ends the subprocess which leads to the end of
     // the whole process instance
     taskService.complete(taskBeforeSubProcess.getId());
-    assertProcessEnded(processInstance.getId());
+    assertProcessEnded(processEngine, processInstance.getId());
     assertThat(runtimeService.createExecutionQuery().list()).hasSize(0);
   }
 
@@ -218,7 +219,7 @@ public class CallActivityAdvancedTest extends PluggableActivitiTestCase {
 
     // Completing this task end the process instance
     taskService.complete(taskAfterSubProcess.getId());
-    assertProcessEnded(processInstance.getId());
+    assertProcessEnded(processEngine, processInstance.getId());
   }
 
   @Deployment(resources = { "org/activiti/engine/test/bpmn/callactivity/CallActivity.testTimerOnCallActivity.bpmn20.xml", "org/activiti/engine/test/bpmn/callactivity/simpleSubProcess.bpmn20.xml" })
@@ -235,7 +236,7 @@ public class CallActivityAdvancedTest extends PluggableActivitiTestCase {
 
     // When the timer on the subprocess is fired, the complete subprocess is destroyed
     processEngineConfiguration.getClock().setCurrentTime(new Date(startTime.getTime() + (6 * 60 * 1000))); // + 6 minutes, timer fires on 5 minutes
-    waitForJobExecutorToProcessAllJobs(10000, 5000L);
+    waitForJobExecutorToProcessAllJobs(processEngine, 10000, 5000L);
 
     Task escalatedTask = taskQuery.singleResult();
     assertThat(escalatedTask.getName()).isEqualTo("Escalated Task");
@@ -247,9 +248,9 @@ public class CallActivityAdvancedTest extends PluggableActivitiTestCase {
     if (processEngineConfiguration.getHistoryLevel().isAtLeast(HistoryLevel.AUDIT)) {
       assertThat(historyService.createHistoricProcessInstanceQuery().processInstanceId(pi2.getId()).singleResult()
           .getDeleteReason()).startsWith(DeleteReason.BOUNDARY_EVENT_INTERRUPTING);
-      assertHistoricTasksDeleteReason(pi2, DeleteReason.BOUNDARY_EVENT_INTERRUPTING, "Task in subprocess");
-      assertHistoricActivitiesDeleteReason(pi1, DeleteReason.BOUNDARY_EVENT_INTERRUPTING, "callSubProcess");
-      assertHistoricActivitiesDeleteReason(pi2, DeleteReason.BOUNDARY_EVENT_INTERRUPTING, "task");
+      TestHelper.assertHistoricTasksDeleteReason(processEngine, pi2, DeleteReason.BOUNDARY_EVENT_INTERRUPTING, "Task in subprocess");
+      TestHelper.assertHistoricActivitiesDeleteReason(processEngine, pi1, DeleteReason.BOUNDARY_EVENT_INTERRUPTING, "callSubProcess");
+      TestHelper.assertHistoricActivitiesDeleteReason(processEngine, pi2, DeleteReason.BOUNDARY_EVENT_INTERRUPTING, "task");
     }
   }
 

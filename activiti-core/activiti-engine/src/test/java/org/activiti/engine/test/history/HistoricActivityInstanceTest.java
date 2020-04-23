@@ -14,6 +14,9 @@
 package org.activiti.engine.test.history;
 
 import static java.util.Collections.singletonMap;
+import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
+import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
+import static org.activiti.engine.impl.test.TestHelper.assertProcessEndedHistoryData;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -151,7 +154,7 @@ public class HistoricActivityInstanceTest extends PluggableActivitiTestCase {
     ProcessInstance pi = runtimeService.startProcessInstanceByKey("eventProcess");
     assertThat(taskService.createTaskQuery().count()).isEqualTo(1);
     runtimeService.signalEventReceived("signal");
-    assertProcessEnded(pi.getId());
+    assertProcessEnded(processEngine, pi.getId());
 
     assertThat(historyService.createHistoricActivityInstanceQuery().activityId("noop").list()).hasSize(1);
     assertThat(historyService.createHistoricActivityInstanceQuery().activityId("userTask").list()).hasSize(1);
@@ -160,8 +163,7 @@ public class HistoricActivityInstanceTest extends PluggableActivitiTestCase {
     assertThat(historyService.createHistoricActivityInstanceQuery().activityId("end").list()).hasSize(1);
 
     // TODO: Discuss if boundary events will occur in the log!
-    // assertThat(1,
-    // historyService.createHistoricActivityInstanceQuery().activityId("boundaryEvent").list().size());
+    // assertThat(1, historyService.createHistoricActivityInstanceQuery().activityId("boundaryEvent").list().size());
 
     HistoricActivityInstance intermediateEvent = historyService.createHistoricActivityInstanceQuery().activityId("intermediate-event").singleResult();
     assertThat(intermediateEvent.getStartTime()).isNotNull();

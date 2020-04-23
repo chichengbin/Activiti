@@ -12,6 +12,7 @@
  */
 package org.activiti.examples.bpmn.event.error;
 
+import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.HashMap;
@@ -83,7 +84,7 @@ public class BoundaryErrorEventTest extends PluggableActivitiTestCase {
     taskService.complete(reviewTasks.get(0).getId());
     variables.put("notEnoughInformation", false);
     taskService.complete(reviewTasks.get(1).getId(), variables);
-    assertProcessEnded(procId);
+    assertProcessEnded(processEngine, procId);
   }
 
 }

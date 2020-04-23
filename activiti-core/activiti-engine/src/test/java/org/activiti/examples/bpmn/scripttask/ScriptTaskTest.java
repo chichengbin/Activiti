@@ -12,6 +12,7 @@
  */
 package org.activiti.examples.bpmn.scripttask;
 
+import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import groovy.lang.MissingPropertyException;
@@ -92,7 +93,7 @@ public class ScriptTaskTest extends PluggableActivitiTestCase {
     ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("testDynamicScript", CollectionUtil.map("a", 20, "b", 22));
     assertThat(((Number) runtimeService.getVariable(processInstance.getId(), "test")).intValue()).isEqualTo(42);
     taskService.complete(taskService.createTaskQuery().singleResult().getId());
-    assertProcessEnded(processInstance.getId());
+    assertProcessEnded(processEngine, processInstance.getId());
 
     String processDefinitionId = processInstance.getProcessDefinitionId();
     ObjectNode infoNode = dynamicBpmnService.changeScriptTaskScript("script1", "var sum = c + d;\nexecution.setVariable('test2', sum);");
@@ -101,7 +102,7 @@ public class ScriptTaskTest extends PluggableActivitiTestCase {
     processInstance = runtimeService.startProcessInstanceByKey("testDynamicScript", CollectionUtil.map("c", 10, "d", 12));
     assertThat(((Number) runtimeService.getVariable(processInstance.getId(), "test2")).intValue()).isEqualTo(22);
     taskService.complete(taskService.createTaskQuery().singleResult().getId());
-    assertProcessEnded(processInstance.getId());
+    assertProcessEnded(processEngine, processInstance.getId());
   }
 
   protected void verifyExceptionInStacktrace(Exception rootException, Class<?> expectedExceptionClass) {

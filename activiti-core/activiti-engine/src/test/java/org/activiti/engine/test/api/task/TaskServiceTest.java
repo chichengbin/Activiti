@@ -271,8 +271,7 @@ public class TaskServiceTest extends PluggableActivitiTestCase {
             assertThat(taskService.getTaskComments(taskId)).hasSize(0);
             assertThat(historyService.createHistoricTaskInstanceQuery().taskId(taskId).list()).hasSize(1);
 
-            taskService.deleteTask(taskId,
-                                   true);
+            taskService.deleteTask(taskId, true);
         }
     }
 

@@ -10,8 +10,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.activiti.engine.test.bpmn.event;
 
+import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.activiti.engine.delegate.DelegateExecution;
@@ -22,20 +24,20 @@ import org.activiti.engine.test.Deployment;
 
 public class IntermediateNoneEventTest extends PluggableActivitiTestCase {
 
-  private static boolean listenerExecuted;
+    private static boolean listenerExecuted;
 
-  public static class MyExecutionListener implements ExecutionListener {
-    public void notify(DelegateExecution execution) {
-      listenerExecuted = true;
+    public static class MyExecutionListener implements ExecutionListener {
+        public void notify(DelegateExecution execution) {
+            listenerExecuted = true;
+        }
     }
-  }
 
-  @Deployment
-  public void testIntermediateNoneTimerEvent() throws Exception {
-    assertThat(listenerExecuted).isFalse();
-    ProcessInstance pi = runtimeService.startProcessInstanceByKey("intermediateNoneEventExample");
-    assertProcessEnded(pi.getProcessInstanceId());
-    assertThat(listenerExecuted).isTrue();
-  }
+    @Deployment
+    public void testIntermediateNoneTimerEvent() throws Exception {
+        assertThat(listenerExecuted).isFalse();
+        ProcessInstance pi = runtimeService.startProcessInstanceByKey("intermediateNoneEventExample");
+        assertProcessEnded(processEngine, pi.getProcessInstanceId());
+        assertThat(listenerExecuted).isTrue();
+    }
 
 }

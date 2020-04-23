@@ -13,6 +13,9 @@
 
 package org.activiti.engine.test.bpmn.servicetask;
 
+import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
+import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
+import static org.activiti.engine.impl.test.TestHelper.assertProcessEndedHistoryData;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.HashMap;
@@ -50,7 +53,8 @@ public class DynamicServiceTaskTest extends PluggableActivitiTestCase {
     task = taskService.createTaskQuery().processInstanceId(processInstance.getId()).singleResult();
     taskService.complete(task.getId());
 
-    assertProcessEnded(processInstance.getId());
+    String processInstanceId = processInstance.getId();
+    assertProcessEnded(processEngine, processInstanceId);
 
     // now test with changing the class name
     varMap = new HashMap<String, Object>();
@@ -71,7 +75,7 @@ public class DynamicServiceTaskTest extends PluggableActivitiTestCase {
     task = taskService.createTaskQuery().processInstanceId(processInstance.getId()).singleResult();
     taskService.complete(task.getId());
 
-    assertProcessEnded(processInstance.getId());
+    assertProcessEnded(processEngine, processInstance.getId());
   }
 
   @Deployment
@@ -94,7 +98,7 @@ public class DynamicServiceTaskTest extends PluggableActivitiTestCase {
       assertThat((Boolean) historicVariableInstance.getValue()).isTrue();
     }
 
-    assertProcessEnded(processInstance.getId());
+    assertProcessEnded(processEngine, processInstance.getId());
 
     // now test with changing the class name
     testBean = new DummyTestBean();
@@ -118,7 +122,7 @@ public class DynamicServiceTaskTest extends PluggableActivitiTestCase {
       assertThat((Boolean) historicVariableInstance.getValue()).isTrue();
     }
 
-    assertProcessEnded(processInstance.getId());
+    assertProcessEnded(processEngine, processInstance.getId());
   }
 
   @Deployment
@@ -141,7 +145,7 @@ public class DynamicServiceTaskTest extends PluggableActivitiTestCase {
       assertThat((Boolean) historicVariableInstance.getValue()).isTrue();
     }
 
-    assertProcessEnded(processInstance.getId());
+    assertProcessEnded(processEngine, processInstance.getId());
 
     // now test with changing the class name
     testBean = new DummyTestDelegateBean();
@@ -165,6 +169,6 @@ public class DynamicServiceTaskTest extends PluggableActivitiTestCase {
       assertThat((Boolean) historicVariableInstance.getValue()).isTrue();
     }
 
-    assertProcessEnded(processInstance.getId());
+    assertProcessEnded(processEngine, processInstance.getId());
   }
 }

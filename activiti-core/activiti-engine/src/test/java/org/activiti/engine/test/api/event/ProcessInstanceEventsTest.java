@@ -12,6 +12,7 @@
  */
 package org.activiti.engine.test.api.event;
 
+import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
@@ -461,7 +462,7 @@ public class ProcessInstanceEventsTest extends PluggableActivitiTestCase {
     Task task = taskService.createTaskQuery().processInstanceId(pi.getId()).taskDefinitionKey("preNormalEnd").singleResult();
     taskService.complete(task.getId());
 
-    assertProcessEnded(pi.getId());
+    assertProcessEnded(processEngine, pi.getId());
     List<ActivitiEvent> processTerminatedEvents = listener.filterEvents(ActivitiEventType.PROCESS_CANCELLED);
     assertThat(processTerminatedEvents).as("There should be exactly one ActivitiEventType.PROCESS_CANCELLED event after the task complete.").hasSize(1);
     ActivitiProcessCancelledEventImpl processCancelledEvent = (ActivitiProcessCancelledEventImpl) processTerminatedEvents.get(0);
@@ -478,7 +479,7 @@ public class ProcessInstanceEventsTest extends PluggableActivitiTestCase {
     Task task = taskService.createTaskQuery().processInstanceId(pi.getId()).taskDefinitionKey("preTerminateEnd").singleResult();
     taskService.complete(task.getId());
 
-    assertProcessEnded(pi.getId());
+    assertProcessEnded(processEngine, pi.getId());
     List<ActivitiEvent> processTerminatedEvents = listener.filterEvents(ActivitiEventType.PROCESS_CANCELLED);
     assertThat(processTerminatedEvents).as("There should be exactly one ActivitiEventType.PROCESS_TERMINATED event after the task complete.").hasSize(1);
     ActivitiProcessCancelledEventImpl processCancelledEvent = (ActivitiProcessCancelledEventImpl) processTerminatedEvents.get(0);
@@ -539,7 +540,7 @@ public class ProcessInstanceEventsTest extends PluggableActivitiTestCase {
 
     // Completing the task will end the process instance
     taskService.complete(task.getId());
-    assertProcessEnded(pi.getId());
+    assertProcessEnded(processEngine, pi.getId());
   }
 
   @Deployment(resources = {

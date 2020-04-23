@@ -13,6 +13,10 @@
 
 package org.activiti.engine.test.bpmn.event.message;
 
+import static org.activiti.engine.impl.test.JobTestHelper.waitForJobExecutorOnCondition;
+import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
+import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
+import static org.activiti.engine.impl.test.TestHelper.assertProcessEndedHistoryData;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -168,7 +172,7 @@ public class MessageBoundaryEventTest extends PluggableActivitiTestCase {
     assertThat(userTask).isNotNull();
     assertThat(userTask.getTaskDefinitionKey()).isEqualTo("taskAfterMessage_1");
     taskService.complete(userTask.getId());
-    assertProcessEnded(processInstance.getId());
+    assertProcessEnded(processEngine, processInstance.getId());
 
     // /////////////////////////////////////////////////////////////////////////////////
     // 2. complete the user task cancels the message subscriptions
@@ -217,7 +221,7 @@ public class MessageBoundaryEventTest extends PluggableActivitiTestCase {
     assertThat(userTask).isNotNull();
     assertThat(userTask.getTaskDefinitionKey()).isEqualTo("taskAfterTask");
     taskService.complete(userTask.getId());
-    assertProcessEnded(processInstance.getId());
+    assertProcessEnded(processEngine, processInstance.getId());
   }
 
   @Deployment
@@ -508,11 +512,7 @@ public class MessageBoundaryEventTest extends PluggableActivitiTestCase {
 
     // After setting the clock to time '1 hour and 5 seconds', the timer should fire.
     processEngineConfiguration.getClock().setCurrentTime(new Date(startTime.getTime() + ((60 * 60 * 1000) + 5000)));
-    waitForJobExecutorOnCondition(5000L, 100L, new Callable<Boolean>() {
-      public Boolean call() throws Exception {
-        return taskService.createTaskQuery().count() == 2;
-      }
-    });
+    waitForJobExecutorOnCondition(processEngine, 5000L, 100L, () -> taskService.createTaskQuery().count() == 2);
 
     // It is a repeating job, so it will come back.
     assertThat(jobQuery.count()).isEqualTo(1L);
@@ -569,24 +569,14 @@ public class MessageBoundaryEventTest extends PluggableActivitiTestCase {
     // After setting the clock to time '2 hours and 5 seconds', the timer
     // should fire.
     processEngineConfiguration.getClock().setCurrentTime(new Date(startTime.getTime() + ((2 * 60 * 60 * 1000) + 5000)));
-    waitForJobExecutorOnCondition(2000L, 100L, new Callable<Boolean>() {
-      @Override
-      public Boolean call() throws Exception {
-        return taskService.createTaskQuery().count() == 2;
-      }
-    });
+    waitForJobExecutorOnCondition(processEngine, 2000L, 100L, () -> taskService.createTaskQuery().count() == 2);
 
     // It is a repeating job, so it will come back.
     assertThat(jobQuery.count()).isEqualTo(1L);
 
     // After setting the clock to time '3 hours and 5 seconds', the timer should fire again.
     processEngineConfiguration.getClock().setCurrentTime(new Date(startTime.getTime() + ((3 * 60 * 60 * 1000) + 5000)));
-    waitForJobExecutorOnCondition(2000L, 100L, new Callable<Boolean>() {
-      @Override
-      public Boolean call() throws Exception {
-        return taskService.createTaskQuery().list().size() == 3;
-      }
-    });
+    waitForJobExecutorOnCondition(processEngine, 2000L, 100L, () -> taskService.createTaskQuery().list().size() == 3);
     // It is a repeating job, so it will come back.
     assertThat(jobQuery.count()).isEqualTo(1L);
 

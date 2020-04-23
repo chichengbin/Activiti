@@ -13,6 +13,7 @@
 package org.activiti.engine.test.api.v6;
 
 import static java.util.Collections.singletonMap;
+import static org.activiti.engine.impl.util.CollectionUtil.map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.HashMap;
@@ -20,21 +21,19 @@ import java.util.List;
 import java.util.Map;
 
 import org.activiti.engine.impl.history.HistoryLevel;
-import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
-import org.activiti.engine.impl.test.PluggableActivitiTestCase;
-import org.activiti.engine.repository.Deployment;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.Job;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
+import org.activiti.engine.test.Deployment;
 import org.junit.Test;
 
 /**
  * These are the first tests ever written for Activiti 6.
  * Keeping them here for nostalgic reasons.
  */
-public class Activiti6Test extends PluggableActivitiTestCase {
+public class Activiti6Test extends AbstractActiviti6Test {
 
     @Test
     public void testSimplestProcessPossible() {
@@ -45,13 +44,11 @@ public class Activiti6Test extends PluggableActivitiTestCase {
         assertThat(processInstance.isEnded()).isTrue();
 
         // Cleanup
-        for (Deployment deployment : repositoryService.createDeploymentQuery().list()) {
-            repositoryService.deleteDeployment(deployment.getId(), true);
-        }
+        repositoryService.createDeploymentQuery().list().forEach(deployment -> repositoryService.deleteDeployment(deployment.getId(), true));
     }
 
     @Test
-    @org.activiti.engine.test.Deployment
+    @Deployment
     public void testOneTaskProcess() {
         ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("oneTaskProcess");
         assertThat(processInstance).isNotNull();
@@ -65,7 +62,7 @@ public class Activiti6Test extends PluggableActivitiTestCase {
     }
 
     @Test
-    @org.activiti.engine.test.Deployment(resources = "org/activiti/engine/test/api/v6/Activiti6Test.testOneTaskProcess.bpmn20.xml")
+    @Deployment(resources = "org/activiti/engine/test/api/v6/Activiti6Test.testOneTaskProcess.bpmn20.xml")
     public void testOneTaskProcessCleanupInMiddleOfProcess() {
         ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("oneTaskProcess");
         assertThat(processInstance).isNotNull();
@@ -77,7 +74,7 @@ public class Activiti6Test extends PluggableActivitiTestCase {
     }
 
     @Test
-    @org.activiti.engine.test.Deployment
+    @Deployment
     public void testSimpleParallelGateway() {
         ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("simpleParallelGateway");
         assertThat(processInstance).isNotNull();
@@ -96,7 +93,7 @@ public class Activiti6Test extends PluggableActivitiTestCase {
     }
 
     @Test
-    @org.activiti.engine.test.Deployment
+    @Deployment
     public void testSimpleNestedParallelGateway() {
         ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("simpleParallelGateway");
         assertThat(processInstance).isNotNull();
@@ -120,7 +117,7 @@ public class Activiti6Test extends PluggableActivitiTestCase {
      * This fails on Activiti 5
      */
     @Test
-    @org.activiti.engine.test.Deployment
+    @Deployment
     public void testLongServiceTaskLoop() {
         int maxCount = 3210; // You can make this as big as you want (as long as
         // it still fits within transaction timeouts). Go
@@ -145,20 +142,17 @@ public class Activiti6Test extends PluggableActivitiTestCase {
     }
 
     @Test
-    @org.activiti.engine.test.Deployment
+    @Deployment
     public void testScriptTask() {
-        Map<String, Object> variableMap = new HashMap<String, Object>();
-        variableMap.put("a",
-                        1);
-        variableMap.put("b",
-                        2);
+        Map<String, Object> variableMap = map(
+            "a", 1,
+            "b", 2);
         ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("oneTaskProcess",
                                                                                    variableMap);
         assertThat(processInstance).isNotNull();
         assertThat(processInstance.isEnded()).isFalse();
 
-        Number sumVariable = (Number) runtimeService.getVariable(processInstance.getId(),
-                                                                 "sum");
+        Number sumVariable = (Number) runtimeService.getVariable(processInstance.getId(), "sum");
         assertThat(sumVariable.intValue()).isEqualTo(3);
 
         Execution execution = runtimeService.createExecutionQuery().processInstanceId(processInstance.getId()).onlyChildExecutions().singleResult();
@@ -170,7 +164,7 @@ public class Activiti6Test extends PluggableActivitiTestCase {
     }
 
     @Test
-    @org.activiti.engine.test.Deployment
+    @Deployment
     public void testSimpleTimerBoundaryEvent() {
         ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("simpleBoundaryTimer");
         assertThat(processInstance).isNotNull();
@@ -188,7 +182,7 @@ public class Activiti6Test extends PluggableActivitiTestCase {
     }
 
     @Test
-    @org.activiti.engine.test.Deployment
+    @Deployment
     public void testSimpleTimerBoundaryEventTimerDoesNotFire() {
         ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("simpleBoundaryTimer");
         assertThat(processInstance).isNotNull();
@@ -205,7 +199,7 @@ public class Activiti6Test extends PluggableActivitiTestCase {
     }
 
     @Test
-    @org.activiti.engine.test.Deployment
+    @Deployment
     public void testSimpleNonInterruptingTimerBoundaryEvent() {
 
         // First test: first the task associated with the parent execution, then
@@ -246,7 +240,7 @@ public class Activiti6Test extends PluggableActivitiTestCase {
     }
 
     @Test
-    @org.activiti.engine.test.Deployment
+    @Deployment
     public void testConditionsWithoutExclusiveGateway() {
 
         // 3 conditions are true for input = 2
@@ -299,7 +293,7 @@ public class Activiti6Test extends PluggableActivitiTestCase {
     }
 
     @Test
-    @org.activiti.engine.test.Deployment
+    @Deployment
     public void testNonInterruptingMoreComplex() {
         ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("nonInterruptingTimer");
         assertThat(processInstance).isNotNull();
@@ -351,7 +345,7 @@ public class Activiti6Test extends PluggableActivitiTestCase {
     }
 
     @Test
-    @org.activiti.engine.test.Deployment
+    @Deployment
     public void testNonInterruptingMoreComplex2() {
 
         // Use case 1: no timers fire
@@ -441,7 +435,7 @@ public class Activiti6Test extends PluggableActivitiTestCase {
      * Based on the process and use cases described in http://www.bp-3.com/blogs/2013/09/joins-and-ibm-bpm-diving-deeper/
      */
     @Test
-    @org.activiti.engine.test.Deployment(resources = "org/activiti/engine/test/api/v6/Activiti6Test.testInclusiveTrickyMerge.bpmn20.xml")
+    @Deployment(resources = "org/activiti/engine/test/api/v6/Activiti6Test.testInclusiveTrickyMerge.bpmn20.xml")
     public void testInclusiveTrickyMergeEasy() {
 
         // Use case 1 (easy):
@@ -475,7 +469,7 @@ public class Activiti6Test extends PluggableActivitiTestCase {
      * Based on the process and use cases described in http://www.bp-3.com/blogs/2013/09/joins-and-ibm-bpm-diving-deeper/
      */
     @Test
-    @org.activiti.engine.test.Deployment(resources = "org/activiti/engine/test/api/v6/Activiti6Test.testInclusiveTrickyMerge.bpmn20.xml")
+    @Deployment(resources = "org/activiti/engine/test/api/v6/Activiti6Test.testInclusiveTrickyMerge.bpmn20.xml")
     public void testInclusiveTrickyMergeDifficult() {
 
         // Use case 2 (tricky):
@@ -517,9 +511,10 @@ public class Activiti6Test extends PluggableActivitiTestCase {
      * Simple test that checks if all databases have correcly added the process definition tag.
      */
     @Test
-    @org.activiti.engine.test.Deployment(resources = "org/activiti/engine/test/api/v6/Activiti6Test.testOneTaskProcess.bpmn20.xml")
+    @Deployment(resources = "org/activiti/engine/test/api/v6/Activiti6Test.testOneTaskProcess.bpmn20.xml")
     public void testProcessDefinitionTagCreated() {
         ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery().singleResult();
-        assertThat(((ProcessDefinitionEntity) processDefinition).getEngineVersion()).isNull();
+        assertThat(processDefinition.getEngineVersion()).isNull();
     }
+
 }

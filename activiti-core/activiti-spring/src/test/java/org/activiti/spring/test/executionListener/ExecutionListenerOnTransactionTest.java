@@ -12,6 +12,7 @@
  */
 package org.activiti.spring.test.executionListener;
 
+import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -134,7 +135,7 @@ public class ExecutionListenerOnTransactionTest extends SpringActivitiTestCase {
         MyTransactionalOperationTransactionDependentExecutionListener.clear();
 
         ProcessInstance firstProcessInstance = runtimeService.startProcessInstanceByKey("transactionDependentExecutionListenerProcess");
-        assertProcessEnded(firstProcessInstance.getId());
+        assertProcessEnded(processEngine, firstProcessInstance.getId());
 
         if (processEngineConfiguration.getHistoryLevel().isAtLeast(HistoryLevel.ACTIVITY)) {
             List<HistoricProcessInstance> historicProcessInstances = historyService.createHistoricProcessInstanceQuery().list();
@@ -144,7 +145,7 @@ public class ExecutionListenerOnTransactionTest extends SpringActivitiTestCase {
 
         Thread.sleep(3);
         ProcessInstance secondProcessInstance = runtimeService.startProcessInstanceByKey("secondTransactionDependentExecutionListenerProcess");
-        assertProcessEnded(secondProcessInstance.getId());
+        assertProcessEnded(processEngine, secondProcessInstance.getId());
 
         if (processEngineConfiguration.getHistoryLevel().isAtLeast(HistoryLevel.ACTIVITY)) {
             // first historic process instance was deleted by execution listener

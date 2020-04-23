@@ -12,6 +12,8 @@
  */
 package org.activiti.engine.test.bpmn.event.timer;
 
+import static org.activiti.engine.impl.test.JobTestHelper.waitForJobExecutorOnCondition;
+import static org.activiti.engine.impl.test.JobTestHelper.waitForJobExecutorToProcessAllJobs;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.ByteArrayInputStream;
@@ -46,8 +48,7 @@ public class StartTimerEventTest extends PluggableActivitiTestCase {
 
         // After setting the clock to time '50 minutes and 5 seconds', the second timer should fire
         processEngineConfiguration.getClock().setCurrentTime(new Date(startTime.getTime() + ((50 * 60 * 1000) + 5000)));
-        waitForJobExecutorToProcessAllJobs(5000L,
-                                           200L);
+        waitForJobExecutorToProcessAllJobs(processEngine, 5000L, 200L);
 
         List<ProcessInstance> pi = runtimeService.createProcessInstanceQuery().processDefinitionKey("startTimerEventExample").list();
         assertThat(pi).hasSize(1);
@@ -62,8 +63,7 @@ public class StartTimerEventTest extends PluggableActivitiTestCase {
         assertThat(jobQuery.count()).isEqualTo(1);
 
         processEngineConfiguration.getClock().setCurrentTime(new SimpleDateFormat("dd/MM/yyyy hh:mm:ss").parse("15/11/2036 11:12:30"));
-        waitForJobExecutorToProcessAllJobs(5000L,
-                                           200L);
+        waitForJobExecutorToProcessAllJobs(processEngine, 5000L, 200L);
 
         List<ProcessInstance> pi = runtimeService.createProcessInstanceQuery().processDefinitionKey("startTimerEventExample").list();
         assertThat(pi).hasSize(1);
@@ -71,8 +71,7 @@ public class StartTimerEventTest extends PluggableActivitiTestCase {
         assertThat(jobQuery.count()).isEqualTo(0);
     }
 
-    // FIXME: This test likes to run in an endless loop when invoking the
-    // waitForJobExecutorOnCondition method
+    // FIXME: This test likes to run in an endless loop when invoking the waitForJobExecutorOnCondition method
     @Deployment
     public void testCycleDateStartTimerEvent() throws Exception {
         processEngineConfiguration.getClock().setCurrentTime(new Date());
@@ -84,24 +83,12 @@ public class StartTimerEventTest extends PluggableActivitiTestCase {
         final ProcessInstanceQuery piq = runtimeService.createProcessInstanceQuery().processDefinitionKey("startTimerEventExample");
 
         moveByMinutes(5);
-        waitForJobExecutorOnCondition(10000,
-                                      500,
-                                      new Callable<Boolean>() {
-                                          public Boolean call() throws Exception {
-                                              return 1 == piq.count();
-                                          }
-                                      });
+        waitForJobExecutorOnCondition(processEngine, 10000, 500, () -> 1 == piq.count()) ;
 
         assertThat(jobQuery.count()).isEqualTo(1);
 
         moveByMinutes(5);
-        waitForJobExecutorOnCondition(10000,
-                                      500,
-                                      new Callable<Boolean>() {
-                                          public Boolean call() throws Exception {
-                                              return 2 == piq.count();
-                                          }
-                                      });
+        waitForJobExecutorOnCondition(processEngine, 10000, 500, () -> 2 == piq.count());
 
         assertThat(jobQuery.count()).isEqualTo(1);
         // have to manually delete pending timer
@@ -140,8 +127,7 @@ public class StartTimerEventTest extends PluggableActivitiTestCase {
         assertThat(jobQuery.count()).isEqualTo(1);
 
         processEngineConfiguration.getClock().setCurrentTime(new SimpleDateFormat("dd/MM/yyyy hh:mm:ss").parse("15/11/2036 11:12:30"));
-        waitForJobExecutorToProcessAllJobs(5000L,
-                                           200L);
+        waitForJobExecutorToProcessAllJobs(processEngine, 5000L, 200L);
 
         List<ProcessInstance> pi = runtimeService.createProcessInstanceQuery().processDefinitionKey("startTimerEventExample").list();
         assertThat(pi).hasSize(1);
@@ -167,32 +153,29 @@ public class StartTimerEventTest extends PluggableActivitiTestCase {
         assertThat(jobQuery.count()).isEqualTo(1);
 
         moveByMinutes(5);
-        waitForJobExecutorOnCondition(10000,
-                                      500,
-                                      new Callable<Boolean>() {
-                                          public Boolean call() throws Exception {
-                                              // we check that correct version was started
-                                              ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processDefinitionKey("startTimerEventExample").singleResult();
-                                              if (processInstance != null) {
-                                                  String pi = processInstance.getId();
-                                                  List<Execution> executions = runtimeService.createExecutionQuery().processInstanceId(pi).list();
-                                                  Execution activityExecution = null;
-                                                  for (Execution execution : executions) {
-                                                      if (!execution.getProcessInstanceId().equals(execution.getId())) {
-                                                          activityExecution = execution;
-                                                          break;
-                                                      }
-                                                  }
-                                                  if (activityExecution != null) {
-                                                      return "changed".equals(activityExecution.getActivityId());
-                                                  } else {
-                                                      return false;
-                                                  }
-                                              } else {
-                                                  return false;
-                                              }
-                                          }
-                                      });
+        waitForJobExecutorOnCondition(processEngine, 10000, 500,
+            () -> {
+                // we check that correct version was started
+                ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processDefinitionKey("startTimerEventExample").singleResult();
+                if (processInstance != null) {
+                    String pi = processInstance.getId();
+                    List<Execution> executions = runtimeService.createExecutionQuery().processInstanceId(pi).list();
+                    Execution activityExecution = null;
+                    for (Execution execution : executions) {
+                        if (!execution.getProcessInstanceId().equals(execution.getId())) {
+                            activityExecution = execution;
+                            break;
+                        }
+                    }
+                    if (activityExecution != null) {
+                        return "changed".equals(activityExecution.getActivityId());
+                    } else {
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
+            });
         assertThat(jobQuery.count()).isEqualTo(1);
 
         cleanDB();

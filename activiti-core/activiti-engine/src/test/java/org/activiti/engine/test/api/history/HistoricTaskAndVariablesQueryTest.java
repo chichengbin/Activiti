@@ -52,16 +52,17 @@ public class HistoricTaskAndVariablesQueryTest extends PluggableActivitiTestCase
 
     private UserGroupManager userGroupManager = Mockito.mock(UserGroupManager.class);
 
+    public HistoricTaskAndVariablesQueryTest() {
+        super();
+        processEngineConfiguration.setUserGroupManager(userGroupManager);
+    }
+
     public void setUp() throws Exception {
-        ProcessEngineConfigurationImpl engineConfiguration = (ProcessEngineConfigurationImpl) cachedProcessEngine.getProcessEngineConfiguration();
-        engineConfiguration.setUserGroupManager(userGroupManager);
         taskIds = generateTestTasks();
     }
 
     public void tearDown() throws Exception {
-
-        taskService.deleteTasks(taskIds,
-                                true);
+        taskService.deleteTasks(taskIds, true);
     }
 
     @Deployment

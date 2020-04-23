@@ -12,6 +12,7 @@
  */
 package org.activiti.spring.test.taskListener;
 
+import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.HashMap;
@@ -139,7 +140,7 @@ public class TaskListenerOnTransactionTest extends SpringActivitiTestCase {
     CurrentTaskTransactionDependentTaskListener.clear();
 
     ProcessInstance firstProcessInstance = runtimeService.startProcessInstanceByKey("transactionDependentTaskListenerProcess");
-    assertProcessEnded(firstProcessInstance.getId());
+    assertProcessEnded(processEngine, firstProcessInstance.getId());
 
     if (processEngineConfiguration.getHistoryLevel().isAtLeast(HistoryLevel.ACTIVITY)) {
       List<HistoricProcessInstance> historicProcessInstances = historyService.createHistoricProcessInstanceQuery().list();
@@ -152,7 +153,7 @@ public class TaskListenerOnTransactionTest extends SpringActivitiTestCase {
     Task task = taskService.createTaskQuery().singleResult();
     taskService.complete(task.getId());
 
-    assertProcessEnded(secondProcessInstance.getId());
+    assertProcessEnded(processEngine, secondProcessInstance.getId());
 
     if (processEngineConfiguration.getHistoryLevel().isAtLeast(HistoryLevel.ACTIVITY)) {
       // first historic process instance was deleted by task listener

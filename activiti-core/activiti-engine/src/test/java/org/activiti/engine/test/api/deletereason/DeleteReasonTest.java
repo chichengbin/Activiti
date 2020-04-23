@@ -12,6 +12,7 @@
  */
 package org.activiti.engine.test.api.deletereason;
 
+import static org.activiti.engine.impl.test.TestHelper.assertHistoricTasksDeleteReason;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
@@ -21,6 +22,7 @@ import org.activiti.engine.history.HistoricActivityInstance;
 import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.impl.history.HistoryLevel;
 import org.activiti.engine.impl.test.PluggableActivitiTestCase;
+import org.activiti.engine.impl.test.TestHelper;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.Job;
 import org.activiti.engine.runtime.ProcessInstance;
@@ -56,8 +58,8 @@ public class DeleteReasonTest extends PluggableActivitiTestCase {
         }
       }
 
-      assertHistoricActivitiesDeleteReason(processInstance, null, "A");
-      assertHistoricActivitiesDeleteReason(processInstance, DeleteReason.PROCESS_INSTANCE_DELETED, "B", "C", "D");
+      TestHelper.assertHistoricActivitiesDeleteReason(processEngine, processInstance, null, "A");
+      TestHelper.assertHistoricActivitiesDeleteReason(processEngine, processInstance, DeleteReason.PROCESS_INSTANCE_DELETED, "B", "C", "D");
     }
   }
 
@@ -90,8 +92,8 @@ public class DeleteReasonTest extends PluggableActivitiTestCase {
         }
       }
 
-      assertHistoricActivitiesDeleteReason(processInstance, null, "A");
-      assertHistoricActivitiesDeleteReason(processInstance, customDeleteReason, "B", "C", "D");
+      TestHelper.assertHistoricActivitiesDeleteReason(processEngine, processInstance, null, "A");
+      TestHelper.assertHistoricActivitiesDeleteReason(processEngine, processInstance, customDeleteReason, "B", "C", "D");
     }
   }
 
@@ -119,7 +121,7 @@ public class DeleteReasonTest extends PluggableActivitiTestCase {
         assertThat(historicTaskInstance.getDeleteReason()).isNull();
       }
 
-      assertHistoricActivitiesDeleteReason(processInstance, null, "A", "B", "C", "D", "E");
+      TestHelper.assertHistoricActivitiesDeleteReason(processEngine, processInstance, null, "A", "B", "C", "D", "E");
     }
   }
 
@@ -163,8 +165,8 @@ public class DeleteReasonTest extends PluggableActivitiTestCase {
           .processInstanceId(processInstance.getId()).singleResult().getDeleteReason())
           .isEqualTo(DeleteReason.PROCESS_INSTANCE_DELETED);
 
-      assertHistoricActivitiesDeleteReason(processInstance, null, "A");
-      assertHistoricActivitiesDeleteReason(processInstance, DeleteReason.PROCESS_INSTANCE_DELETED, "B", "C");
+      TestHelper.assertHistoricActivitiesDeleteReason(processEngine, processInstance, null, "A");
+      TestHelper.assertHistoricActivitiesDeleteReason(processEngine, processInstance, DeleteReason.PROCESS_INSTANCE_DELETED, "B", "C");
     }
   }
 
@@ -180,10 +182,10 @@ public class DeleteReasonTest extends PluggableActivitiTestCase {
     managementService.moveTimerToExecutableJob(timerJob.getId());
     managementService.executeJob(timerJob.getId());
 
-    assertHistoricTasksDeleteReason(processInstance, null, "A");
-    assertHistoricTasksDeleteReason(processInstance, DeleteReason.BOUNDARY_EVENT_INTERRUPTING, "B", "C", "D");
-    assertHistoricActivitiesDeleteReason(processInstance, null, "A");
-    assertHistoricActivitiesDeleteReason(processInstance, DeleteReason.BOUNDARY_EVENT_INTERRUPTING, "B", "C", "D", "theSubprocess");
+    assertHistoricTasksDeleteReason(processEngine, processInstance, null, "A");
+    assertHistoricTasksDeleteReason(processEngine, processInstance, DeleteReason.BOUNDARY_EVENT_INTERRUPTING, "B", "C", "D");
+    TestHelper.assertHistoricActivitiesDeleteReason(processEngine, processInstance, null, "A");
+    TestHelper.assertHistoricActivitiesDeleteReason(processEngine, processInstance, DeleteReason.BOUNDARY_EVENT_INTERRUPTING, "B", "C", "D", "theSubprocess");
   }
 
   @Deployment
@@ -198,8 +200,8 @@ public class DeleteReasonTest extends PluggableActivitiTestCase {
     managementService.moveTimerToExecutableJob(timerJob.getId());
     managementService.executeJob(timerJob.getId());
 
-    assertHistoricActivitiesDeleteReason(processInstance, null, "A");
-    assertHistoricActivitiesDeleteReason(processInstance, DeleteReason.BOUNDARY_EVENT_INTERRUPTING, "B", "C", "theSubprocess");
+    TestHelper.assertHistoricActivitiesDeleteReason(processEngine, processInstance, null, "A");
+    TestHelper.assertHistoricActivitiesDeleteReason(processEngine, processInstance, DeleteReason.BOUNDARY_EVENT_INTERRUPTING, "B", "C", "theSubprocess");
   }
 
 }

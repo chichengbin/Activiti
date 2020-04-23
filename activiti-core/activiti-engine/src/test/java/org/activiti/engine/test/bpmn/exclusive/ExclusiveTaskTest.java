@@ -12,6 +12,7 @@
  */
 package org.activiti.engine.test.bpmn.exclusive;
 
+import static org.activiti.engine.impl.test.JobTestHelper.waitForJobExecutorToProcessAllJobs;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.activiti.engine.impl.persistence.entity.JobEntity;
@@ -34,7 +35,7 @@ public class ExclusiveTaskTest extends PluggableActivitiTestCase {
     assertThat(job).isNotNull();
     assertThat(((JobEntity) job).isExclusive()).isFalse();
 
-    waitForJobExecutorToProcessAllJobs(6000L, 100L);
+    waitForJobExecutorToProcessAllJobs(processEngine, 6000L, 100L);
 
     // all the jobs are done
     assertThat(managementService.createJobQuery().count()).isEqualTo(0);
@@ -49,7 +50,7 @@ public class ExclusiveTaskTest extends PluggableActivitiTestCase {
     assertThat(job).isNotNull();
     assertThat(((JobEntity) job).isExclusive()).isTrue();
 
-    waitForJobExecutorToProcessAllJobs(6000L, 100L);
+    waitForJobExecutorToProcessAllJobs(processEngine, 6000L, 100L);
 
     // all the jobs are done
     assertThat(managementService.createJobQuery().count()).isEqualTo(0);
@@ -62,7 +63,7 @@ public class ExclusiveTaskTest extends PluggableActivitiTestCase {
     // now there should be 3 exclusive jobs in the database:
     assertThat(managementService.createJobQuery().count()).isEqualTo(3);
 
-    waitForJobExecutorToProcessAllJobs(20000L, 400L);
+    waitForJobExecutorToProcessAllJobs(processEngine, 20000L, 400L);
 
     // all the jobs are done
     assertThat(managementService.createJobQuery().count()).isEqualTo(0);

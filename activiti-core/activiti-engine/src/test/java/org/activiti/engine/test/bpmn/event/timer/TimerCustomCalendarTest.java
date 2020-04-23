@@ -13,6 +13,7 @@
 
 package org.activiti.engine.test.bpmn.event.timer;
 
+import static org.activiti.engine.impl.test.JobTestHelper.waitForJobExecutorToProcessAllJobsAndExecutableTimerJobs;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -70,7 +71,7 @@ public class TimerCustomCalendarTest extends ResourceActivitiTestCase {
 
     managementService.moveTimerToExecutableJob(jobs.get(0).getId());
     managementService.executeJob(jobs.get(0).getId());
-    waitForJobExecutorToProcessAllJobsAndExecutableTimerJobs(10000, 200);
+    waitForJobExecutorToProcessAllJobsAndExecutableTimerJobs(processEngine, 10000, 200);
 
     Execution execution = runtimeService.createExecutionQuery().processInstanceId(processInstance.getId()).activityId("receive").singleResult();
     runtimeService.trigger(execution.getId());
@@ -94,7 +95,7 @@ public class TimerCustomCalendarTest extends ResourceActivitiTestCase {
 
     managementService.moveTimerToExecutableJob(jobs.get(0).getId());
     managementService.executeJob(jobs.get(0).getId());
-    waitForJobExecutorToProcessAllJobsAndExecutableTimerJobs(10000, 200);
+    waitForJobExecutorToProcessAllJobsAndExecutableTimerJobs(processEngine, 10000, 200);
   }
 
   public static class CustomBusinessCalendar implements BusinessCalendar {

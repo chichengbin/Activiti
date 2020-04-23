@@ -14,6 +14,8 @@
 package org.activiti.engine.test.bpmn.subprocess;
 
 import static java.util.Collections.singletonMap;
+import static org.activiti.engine.impl.test.JobTestHelper.waitForJobExecutorToProcessAllJobs;
+import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Date;
@@ -56,7 +58,7 @@ public class SubProcessTest extends PluggableActivitiTestCase {
   public void testSimpleAutomaticSubProcess() {
     ProcessInstance pi = runtimeService.startProcessInstanceByKey("simpleSubProcessAutomatic");
     assertThat(pi.isEnded()).isTrue();
-    assertProcessEnded(pi.getId());
+    assertProcessEnded(processEngine, pi.getId());
   }
 
   @Deployment
@@ -72,7 +74,7 @@ public class SubProcessTest extends PluggableActivitiTestCase {
     // Setting the clock forward 2 hours 1 second (timer fires in 2 hours) and fire up the job executor
     processEngineConfiguration.getClock().setCurrentTime(new Date(startTime.getTime() + (2 * 60 * 60 * 1000) + 1000));
     assertThat(managementService.createTimerJobQuery().count()).isEqualTo(1);
-    waitForJobExecutorToProcessAllJobs(5000L, 500L);
+    waitForJobExecutorToProcessAllJobs(processEngine, 5000L, 500L);
 
     // The subprocess should be left, and the escalated task should be active
     Task escalationTask = taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
@@ -115,7 +117,7 @@ public class SubProcessTest extends PluggableActivitiTestCase {
     // Completing the two tasks should end the process instance
     taskService.complete(taskAfterTimer1.getId());
     taskService.complete(taskAfterTimer2.getId());
-    assertProcessEnded(pi.getId());
+    assertProcessEnded(processEngine, pi.getId());
   }
 
   /**
@@ -141,7 +143,7 @@ public class SubProcessTest extends PluggableActivitiTestCase {
     assertThat(taskAfterSubProcesses.getName()).isEqualTo("Task after subprocesses");
     taskService.complete(taskAfterSubProcesses.getId());
 
-    assertProcessEnded(pi.getId());
+    assertProcessEnded(processEngine, pi.getId());
   }
 
   @Deployment
@@ -156,7 +158,7 @@ public class SubProcessTest extends PluggableActivitiTestCase {
     // Setting the clock forward 1 hour 1 second (timer fires in 1 hour) and
     // fire up the job executor
     processEngineConfiguration.getClock().setCurrentTime(new Date(startTime.getTime() + (60 * 60 * 1000) + 1000));
-    waitForJobExecutorToProcessAllJobs(5000L, 50L);
+    waitForJobExecutorToProcessAllJobs(processEngine, 5000L, 50L);
 
     // The inner subprocess should be destroyed, and the escalated task should be active
     Task escalationTask = taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
@@ -233,7 +235,7 @@ public class SubProcessTest extends PluggableActivitiTestCase {
     // Completing the task after the timer ends the process instance
     taskService.complete(taskAfterTimer.getId());
 
-    assertProcessEnded(processInstance.getId());
+    assertProcessEnded(processEngine, processInstance.getId());
   }
 
   @Deployment
@@ -265,7 +267,7 @@ public class SubProcessTest extends PluggableActivitiTestCase {
     taskService.complete(tasks.get(0).getId());
     taskService.complete(tasks.get(1).getId());
 
-    assertProcessEnded(pi.getId());
+    assertProcessEnded(processEngine, pi.getId());
   }
 
   @Deployment
@@ -289,7 +291,7 @@ public class SubProcessTest extends PluggableActivitiTestCase {
 
     // Completing this task should end the process
     taskService.complete(taskAfterSubProcess.getId());
-    assertProcessEnded(pi.getId());
+    assertProcessEnded(processEngine, pi.getId());
   }
 
   @Deployment
@@ -320,7 +322,7 @@ public class SubProcessTest extends PluggableActivitiTestCase {
 
     // Completing the task should end the process instance
     taskService.complete(taskAfterTimer.getId());
-    assertProcessEnded(pi.getId());
+    assertProcessEnded(processEngine, pi.getId());
   }
 
   /**
@@ -337,7 +339,7 @@ public class SubProcessTest extends PluggableActivitiTestCase {
   @Deployment
   public void testSimpleSubProcessWithoutEndEvent() {
     ProcessInstance pi = runtimeService.startProcessInstanceByKey("testSimpleSubProcessWithoutEndEvent");
-    assertProcessEnded(pi.getId());
+    assertProcessEnded(processEngine, pi.getId());
   }
 
   /**
@@ -346,7 +348,7 @@ public class SubProcessTest extends PluggableActivitiTestCase {
   @Deployment
   public void testNestedSubProcessesWithoutEndEvents() {
     ProcessInstance pi = runtimeService.startProcessInstanceByKey("testNestedSubProcessesWithoutEndEvents");
-    assertProcessEnded(pi.getId());
+    assertProcessEnded(processEngine, pi.getId());
   }
 
   /**

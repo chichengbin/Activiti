@@ -13,6 +13,8 @@
 
 package org.activiti.spring.impl.test;
 
+import static org.activiti.engine.impl.test.TestHelper.cleanUpDeployments;
+
 import org.activiti.engine.HistoryService;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.ProcessEngine;
@@ -20,21 +22,20 @@ import org.activiti.engine.ProcessEngineConfiguration;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
-import org.activiti.engine.impl.test.JobTestHelper;
-import org.activiti.engine.impl.test.TestHelper;
 import org.activiti.engine.test.ActivitiRule;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 /**
  *
  */
 @RunWith(SpringRunner.class)
+@ContextConfiguration("classpath:org/activiti/spring/impl/test/activitiRule-context.xml")
 public abstract class SpringActivitiTestCase {
 
     @Autowired
@@ -62,24 +63,12 @@ public abstract class SpringActivitiTestCase {
     protected TaskService taskService;
 
     @Rule
-    public ActivitiRule activitiRule = new ActivitiRule();
-
-    @Before
-    public void setUp() {
-        activitiRule.setProcessEngine(processEngine);
-    }
+    @Autowired
+    public ActivitiRule activitiRule;
 
     @After
     public void tearDown() {
-        TestHelper.cleanUpDeployments(repositoryService);
-    }
-
-    protected void waitForJobExecutorToProcessAllJobs(long maxMillisToWait, long intervalMillis) {
-        JobTestHelper.waitForJobExecutorToProcessAllJobs(activitiRule, maxMillisToWait, intervalMillis);
-    }
-
-    protected void assertProcessEnded(String processInstanceId) {
-        TestHelper.assertProcessEnded(processEngine, processInstanceId);
+        cleanUpDeployments(repositoryService);
     }
 
 }

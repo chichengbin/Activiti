@@ -41,8 +41,6 @@
 
   <bean id="throwBpmnErrorDelegate" class="org.activiti.spring.test.servicetask.ThrowBpmnErrorDelegate"/>
 
-  <bean id="activitiRule" class="org.activiti.engine.test.ActivitiRule">
-    <property name="processEngine" ref="processEngine"/>
-  </bean>
+  <import resource="classpath:org/activiti/spring/impl/test/activitiRule-context.xml"/>
 
 </beans>

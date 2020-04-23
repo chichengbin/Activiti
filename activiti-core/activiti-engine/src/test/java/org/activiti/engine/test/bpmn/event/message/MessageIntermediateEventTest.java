@@ -25,6 +25,7 @@ import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.test.Deployment;
 
+import static org.activiti.engine.impl.test.JobTestHelper.waitForJobExecutorToProcessAllJobs;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -130,7 +131,7 @@ public class MessageIntermediateEventTest extends PluggableActivitiTestCase {
 
     assertThat(managementService.createJobQuery().messages().count()).isEqualTo(1);
 
-    waitForJobExecutorToProcessAllJobs(8000L, 200L);
+    waitForJobExecutorToProcessAllJobs(processEngine, 8000L, 200L);
     assertThat(createEventSubscriptionQuery().count()).isEqualTo(0);
     assertThat(runtimeService.createProcessInstanceQuery().count()).isEqualTo(0);
     assertThat(managementService.createJobQuery().count()).isEqualTo(0);

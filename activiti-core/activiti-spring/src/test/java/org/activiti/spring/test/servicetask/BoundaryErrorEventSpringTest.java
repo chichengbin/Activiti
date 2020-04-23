@@ -13,6 +13,7 @@
 
 package org.activiti.spring.test.servicetask;
 
+import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.activiti.engine.task.Task;
@@ -45,7 +46,7 @@ public class BoundaryErrorEventSpringTest extends SpringActivitiTestCase {
 
         // Completing the task will end the process instance
         taskService.complete(task.getId());
-        assertProcessEnded(procId);
+        assertProcessEnded(processEngine, procId);
     }
 
 }

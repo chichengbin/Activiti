@@ -12,6 +12,7 @@
  */
 package org.activiti.engine.test.api.v6;
 
+import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
@@ -24,13 +25,14 @@ import org.activiti.engine.delegate.event.ActivitiEventListener;
 import org.activiti.engine.history.HistoricActivityInstance;
 import org.activiti.engine.impl.history.HistoryLevel;
 import org.activiti.engine.impl.test.PluggableActivitiTestCase;
+import org.activiti.engine.impl.test.TestHelper;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.test.Deployment;
 import org.junit.Test;
 
-public class Activiti6ExecutionTest extends PluggableActivitiTestCase {
+public class Activiti6ExecutionTest extends AbstractActiviti6Test {
 
   @Test
   @Deployment
@@ -145,7 +147,7 @@ public class Activiti6ExecutionTest extends PluggableActivitiTestCase {
 
     taskService.complete(task.getId());
 
-    assertProcessEnded(processInstance.getId());
+    assertProcessEnded(processEngine, processInstance.getId());
 
     if (processEngineConfiguration.getHistoryLevel().isAtLeast(HistoryLevel.ACTIVITY)) {
       List<HistoricActivityInstance> historicActivities = historyService.createHistoricActivityInstanceQuery()
@@ -251,7 +253,7 @@ public class Activiti6ExecutionTest extends PluggableActivitiTestCase {
 
     taskService.complete(task.getId());
 
-    assertProcessEnded(processInstance.getId());
+    assertProcessEnded(processEngine, processInstance.getId());
 
     if (processEngineConfiguration.getHistoryLevel().isAtLeast(HistoryLevel.ACTIVITY)) {
       List<HistoricActivityInstance> historicActivities = historyService.createHistoricActivityInstanceQuery()
@@ -317,7 +319,7 @@ public class Activiti6ExecutionTest extends PluggableActivitiTestCase {
     task = taskService.createTaskQuery().processInstanceId(processInstance.getId()).singleResult();
     taskService.complete(task.getId());
 
-    assertProcessEnded(processInstance.getId());
+    assertProcessEnded(processEngine, processInstance.getId());
 
     // Verify Events
     List<ActivitiEvent> events = listener.getEventsReceived();

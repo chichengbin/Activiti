@@ -8,6 +8,7 @@
 
 package org.activiti.spring.test.expression.callactivity;
 
+import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.activiti.engine.runtime.ProcessInstance;
@@ -53,7 +54,7 @@ public class CallActivityBasedOnSpringBeansExpressionTest extends SpringActiviti
 
         // Completing this task end the process instance
         taskService.complete(taskAfterSubProcess.getId());
-        assertProcessEnded(processInstance.getId());
+        assertProcessEnded(processEngine, processInstance.getId());
     }
 
 }

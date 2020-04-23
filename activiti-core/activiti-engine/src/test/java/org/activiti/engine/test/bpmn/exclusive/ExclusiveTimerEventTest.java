@@ -10,12 +10,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.activiti.engine.test.bpmn.exclusive;
 
+import static org.activiti.engine.impl.test.JobTestHelper.waitForJobExecutorToProcessAllJobsAndExecutableTimerJobs;
+import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
+import static org.activiti.engine.impl.test.TestHelper.assertProcessEnded;
+import static org.activiti.engine.impl.test.TestHelper.assertProcessEndedHistoryData;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Date;
-
 import org.activiti.engine.impl.test.PluggableActivitiTestCase;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.runtime.TimerJobQuery;
@@ -23,22 +27,23 @@ import org.activiti.engine.test.Deployment;
 
 public class ExclusiveTimerEventTest extends PluggableActivitiTestCase {
 
-  @Deployment
-  public void testCatchingTimerEvent() throws Exception {
+    @Deployment
+    public void testCatchingTimerEvent() throws Exception {
 
-    // Set the clock fixed
-    Date startTime = new Date();
+        // Set the clock fixed
+        Date startTime = new Date();
 
-    // After process start, there should be 3 timers created
-    ProcessInstance pi = runtimeService.startProcessInstanceByKey("exclusiveTimers");
-    TimerJobQuery jobQuery = managementService.createTimerJobQuery().processInstanceId(pi.getId());
-    assertThat(jobQuery.count()).isEqualTo(3);
+        // After process start, there should be 3 timers created
+        ProcessInstance pi = runtimeService.startProcessInstanceByKey("exclusiveTimers");
+        TimerJobQuery jobQuery = managementService.createTimerJobQuery().processInstanceId(pi.getId());
+        assertThat(jobQuery.count()).isEqualTo(3);
 
-    // After setting the clock to time '50minutes and 5 seconds', the timers should fire
-    processEngineConfiguration.getClock().setCurrentTime(new Date(startTime.getTime() + ((50 * 60 * 1000) + 5000)));
-    waitForJobExecutorToProcessAllJobsAndExecutableTimerJobs(5000L, 500L);
+        // After setting the clock to time '50minutes and 5 seconds', the timers should fire
+        processEngineConfiguration.getClock().setCurrentTime(new Date(startTime.getTime() + ((50 * 60 * 1000) + 5000)));
+        waitForJobExecutorToProcessAllJobsAndExecutableTimerJobs(processEngine, 5000L, 500L);
 
-    assertThat(jobQuery.count()).isEqualTo(0);
-    assertProcessEnded(pi.getProcessInstanceId());
-  }
+        assertThat(jobQuery.count()).isEqualTo(0);
+        assertProcessEnded(processEngine, pi.getProcessInstanceId());
+    }
+
 }
